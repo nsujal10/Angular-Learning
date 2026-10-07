@@ -1,0 +1,235 @@
+/* Employee List & Modern Responsive Table Styling */
+:host {
+  display: block;
+  width: 100%;
+}
+
+.list-container {
+  width: 100%;
+}
+
+.table-card {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  overflow-x: auto;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+}
+
+.employee-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.employee-table th {
+  padding: 1rem 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  background: rgba(15, 23, 42, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.employee-table td {
+  padding: 1.1rem 1.25rem;
+  font-size: 0.875rem;
+  color: #cbd5e1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.employee-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.employee-table tbody tr:hover {
+  background-color: rgba(99, 102, 241, 0.08);
+}
+
+.employee-table tbody tr.row-selected {
+  background-color: rgba(99, 102, 241, 0.16);
+  box-shadow: inset 3px 0 0 #6366f1;
+}
+
+/* Employee Column & Meta */
+.emp-user-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.avatar-sm {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+.name-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.emp-name {
+  font-weight: 600;
+  color: #f8fafc;
+  font-size: 0.9rem;
+  letter-spacing: 0.03em;
+}
+
+.emp-email {
+  font-size: 0.775rem;
+  color: #94a3b8;
+}
+
+/* Department & Role */
+.dept-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.emp-dept-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #818cf8;
+  background: rgba(99, 102, 241, 0.12);
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.emp-role-title {
+  font-size: 0.82rem;
+  color: #cbd5e1;
+}
+
+/* Status Chips */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.active-chip {
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.inactive-chip {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.indicator-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.active-dot {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
+}
+
+.inactive-dot {
+  background: #94a3b8;
+}
+
+/* Salary Column */
+.salary-val {
+  font-family: monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #34d399;
+}
+
+/* Action Buttons */
+.text-right {
+  text-align: right;
+}
+
+.btn-view {
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-view:hover {
+  background: #6366f1;
+  color: #ffffff;
+  border-color: #6366f1;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.btn-view.btn-view-active {
+  background: #6366f1;
+  color: #ffffff;
+  border-color: #6366f1;
+}
+
+/* Empty Search State */
+.empty-table-cell {
+  padding: 3.5rem 1rem !important;
+  text-align: center;
+}
+
+.empty-search-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #94a3b8;
+}
+
+.empty-search-state svg {
+  margin-bottom: 0.75rem;
+  opacity: 0.5;
+}
+
+.empty-msg {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin: 0 0 0.25rem 0;
+}
+
+.empty-sub {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+/* Responsive Table Adjustments */
+@media (max-width: 768px) {
+  .employee-table th,
+  .employee-table td {
+    padding: 0.75rem 0.85rem;
+  }
+}

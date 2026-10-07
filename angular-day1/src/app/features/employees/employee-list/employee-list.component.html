@@ -1,0 +1,94 @@
+<div class="list-container">
+  <!-- Desktop / Tablet Table View -->
+  <div class="table-card">
+    <table class="employee-table">
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>Department & Role</th>
+          <th>Status</th>
+          <th>Salary</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Requirement 1: Display employees using Angular 17+ @for with track expression -->
+        @for (employee of employees; track employee.id) {
+          <tr 
+            [class.row-selected]="employee.id === selectedEmployeeId"
+            (click)="selectEmployee(employee)">
+            
+            <!-- Employee Info (Avatar + Uppercase Name + Email) -->
+            <td class="col-employee">
+              <div class="emp-user-meta">
+                <div class="avatar-sm">
+                  {{ employee.name | initials }}
+                </div>
+                <div class="name-box">
+                  <!-- Requirement 4: Display name using uppercase pipe -->
+                  <span class="emp-name">{{ employee.name | uppercase }}</span>
+                  <span class="emp-email">{{ employee.email }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Department & Role -->
+            <td>
+              <div class="dept-box">
+                <span class="emp-dept-badge">{{ employee.department }}</span>
+                <span class="emp-role-title">{{ employee.role }}</span>
+              </div>
+            </td>
+
+            <!-- Requirement 2: Display employee status using @if control flow -->
+            <td>
+              @if (employee.active) {
+                <span class="status-chip active-chip">
+                  <span class="indicator-dot active-dot"></span>
+                  Active
+                </span>
+              } @else {
+                <span class="status-chip inactive-chip">
+                  <span class="indicator-dot inactive-dot"></span>
+                  Inactive
+                </span>
+              }
+            </td>
+
+            <!-- Requirement 3: Display salary using currency pipe -->
+            <td class="col-salary">
+              <span class="salary-val">
+                {{ employee.salary | currency:'USD':'symbol':'1.0-0' }}
+              </span>
+            </td>
+
+            <!-- Requirement 8: Click event button to select an employee -->
+            <td class="text-right">
+              <button 
+                type="button"
+                class="btn-view"
+                (click)="$event.stopPropagation(); selectEmployee(employee)"
+                [class.btn-view-active]="employee.id === selectedEmployeeId">
+                View
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <!-- Empty State fallback using @empty block -->
+          <tr>
+            <td colspan="5" class="empty-table-cell">
+              <div class="empty-search-state">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <p class="empty-msg">No employees found matching your criteria</p>
+                <span class="empty-sub">Try searching by another name, department, or role</span>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

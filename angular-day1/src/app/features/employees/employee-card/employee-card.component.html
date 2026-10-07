@@ -1,0 +1,97 @@
+<!-- Employee Detail Card Container -->
+<div class="card-wrapper">
+  @if (employee; as emp) {
+    <!-- Active Selected Employee View -->
+    <div class="detail-card">
+      <!-- Card Header with Close button -->
+      <div class="card-top-bar">
+        <span class="card-tag">ID: #{{ emp.id }}</span>
+        <button class="icon-btn-close" (click)="onClose()" title="Close details" aria-label="Close details">
+          &times;
+        </button>
+      </div>
+
+      <!-- Hero Profile Section -->
+      <div class="profile-hero">
+        <div class="avatar-ring">
+          <div class="avatar-circle">
+            {{ emp.name | initials }}
+          </div>
+        </div>
+        
+        <!-- Requirement 4: Display name with uppercase pipe -->
+        <h3 class="employee-name">{{ emp.name | uppercase }}</h3>
+        <p class="employee-role">{{ emp.role }}</p>
+
+        <!-- Requirement 2: Display employee status using @if -->
+        <div class="status-container">
+          @if (emp.active) {
+            <span class="badge badge-active">
+              <span class="status-dot green-dot"></span>
+              Active Member
+            </span>
+          } @else {
+            <span class="badge badge-inactive">
+              <span class="status-dot gray-dot"></span>
+              On Leave / Inactive
+            </span>
+          }
+        </div>
+      </div>
+
+      <!-- Information Grid -->
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Department</span>
+          <span class="info-value">{{ emp.department }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Email Address</span>
+          <a class="info-value link-email" [href]="'mailto:' + emp.email">{{ emp.email }}</a>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Compensation</span>
+          <!-- Requirement 3: Display salary using currency pipe -->
+          <span class="info-value salary-highlight">{{ emp.salary | currency:'USD':'symbol':'1.0-0' }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Account Security</span>
+          <span class="info-value">Verified 2FA</span>
+        </div>
+      </div>
+
+      <!-- Card Action Section -->
+      <div class="card-footer">
+        <!-- Requirement 7: [disabled] property binding demonstration -->
+        <button 
+          class="btn-primary" 
+          [disabled]="!employee" 
+          (click)="onViewDetails()">
+          View Details
+        </button>
+      </div>
+    </div>
+  } @else {
+    <!-- Empty State: No Employee Selected Yet -->
+    <div class="empty-card">
+      <div class="empty-icon-box">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <line x1="19" y1="8" x2="19" y2="14"></line>
+          <line x1="22" y1="11" x2="16" y2="11"></line>
+        </svg>
+      </div>
+      <h4 class="empty-title">No Employee Selected</h4>
+      <p class="empty-text">Select an employee from the list to view their detailed profile, compensation, and status.</p>
+
+      <!-- Disabled button showcase when nothing is selected -->
+      <button class="btn-primary" [disabled]="!employee">
+        View Details
+      </button>
+    </div>
+  }
+</div>
