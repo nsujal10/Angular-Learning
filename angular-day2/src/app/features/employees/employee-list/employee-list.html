@@ -1,0 +1,17 @@
+<div class="employee-grid">
+  @for (employee of employees(); track employee.id) {
+    <app-employee-card
+      [employee]="employee"
+      (selected)="onEmployeeSelected($event)"
+      (deleted)="onEmployeeDeleted($event)"
+      (statusToggled)="onStatusToggled($event)"
+    >
+    </app-employee-card>
+  } @empty {
+    <div class="empty-state">
+      <div class="empty-icon">👥</div>
+      <h3>No employees found</h3>
+      <p>No matching employees match your filter criteria or the employee list is empty.</p>
+    </div>
+  }
+</div>

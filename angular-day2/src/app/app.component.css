@@ -1,0 +1,16 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.app-viewport {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .app-viewport {
+    padding: 1rem 0.75rem 2rem 0.75rem;
+  }
+}

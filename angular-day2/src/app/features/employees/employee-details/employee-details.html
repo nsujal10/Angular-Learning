@@ -1,0 +1,100 @@
+@if (employee(); as emp) {
+  <app-card>
+    <!-- Slot: Header -->
+    <div header class="details-header">
+      <div class="header-main">
+        <div class="detail-avatar" [class.inactive]="!emp.active">
+          {{ emp.name.charAt(0) }}
+        </div>
+        <div>
+          <h2 class="detail-name">{{ emp.name }}</h2>
+          <span class="detail-subtitle">Employee ID: #{{ emp.id }}</span>
+        </div>
+      </div>
+      <button type="button" class="btn-close" (click)="close()" title="Close details pane">
+        ✕
+      </button>
+    </div>
+
+    <!-- Slot: Body (Default ng-content) -->
+    <div class="details-body">
+      <div class="details-grid">
+        <div class="field-card">
+          <span class="field-label">Full Name</span>
+          <span class="field-value">{{ emp.name }}</span>
+        </div>
+
+        <div class="field-card">
+          <span class="field-label">Email Address</span>
+          <span class="field-value email">{{ emp.email }}</span>
+        </div>
+
+        <div class="field-card">
+          <span class="field-label">Department</span>
+          <span class="field-value badge-dept">{{ emp.department }}</span>
+        </div>
+
+        <div class="field-card">
+          <span class="field-label">Role / Title</span>
+          <span class="field-value">{{ emp.role }}</span>
+        </div>
+
+        <div class="field-card">
+          <span class="field-label">Annual Salary</span>
+          <span class="field-value salary">${{ emp.salary | number }} USD</span>
+        </div>
+
+        <div class="field-card">
+          <span class="field-label">Current Status</span>
+          <div class="field-value">
+            <span class="status-indicator" [class.active]="emp.active">
+              <span class="status-dot"></span>
+              {{ emp.active ? 'Active Employee' : 'Inactive / On Leave' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="architecture-callout">
+        <div class="callout-badge">Flow Step 44</div>
+        <p>
+          Data passed through hierarchy:
+          <code>EmployeeCard</code> ➔ <code>EmployeeList</code> ➔ <code>EmployeeDashboard</code> ➔ <code>EmployeeDetails</code>
+        </p>
+      </div>
+    </div>
+
+    <!-- Slot: Footer -->
+    <div footer class="details-footer">
+      <button
+        type="button"
+        class="btn-toggle"
+        (click)="toggleStatus(emp.id)"
+      >
+        Toggle {{ emp.active ? 'to Inactive' : 'to Active' }}
+      </button>
+
+      <button
+        type="button"
+        class="btn-danger"
+        (click)="remove(emp.id)"
+      >
+        Delete Employee
+      </button>
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="close()"
+      >
+        Done
+      </button>
+    </div>
+  </app-card>
+} @else {
+  <div class="no-selection-card">
+    <div class="no-selection-icon">👈</div>
+    <h3>No Employee Selected</h3>
+    <p>Select any employee card in the list to view their detailed dossier, inspect their profile, or edit status.</p>
+  </div>
+}

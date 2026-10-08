@@ -1,0 +1,67 @@
+<app-card>
+  <!-- Projected Header Slot -->
+  <div header class="card-header-inner">
+    <div class="user-identity">
+      <div class="user-avatar" [class.inactive]="!employee().active">
+        {{ employee().name.charAt(0) }}
+      </div>
+      <div class="user-titles">
+        <h3 class="user-name">{{ employee().name }}</h3>
+        <span class="user-dept">{{ employee().department }}</span>
+      </div>
+    </div>
+    <button
+      type="button"
+      class="status-pill"
+      [class.active]="employee().active"
+      (click)="onToggleStatus(employee().id, $event)"
+      title="Click to toggle active status"
+    >
+      <span class="dot"></span>
+      {{ employee().active ? 'Active' : 'Inactive' }}
+    </button>
+  </div>
+
+  <!-- Projected Default Body Slot -->
+  <div class="card-body-inner">
+    <div class="meta-row">
+      <span class="meta-label">Role:</span>
+      <span class="meta-value highlight">{{ employee().role }}</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">Email:</span>
+      <span class="meta-value email" [title]="employee().email">{{ employee().email }}</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">Salary:</span>
+      <span class="meta-value salary">${{ employee().salary | number }} / yr</span>
+    </div>
+  </div>
+
+  <!-- Projected Footer Slot -->
+  <div footer class="card-footer-inner">
+    <button
+      type="button"
+      class="btn-delete"
+      (click)="onDelete(employee().id, $event)"
+      title="Delete employee (watch ngOnDestroy execute in console!)"
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+      </svg>
+      Remove
+    </button>
+    <button
+      type="button"
+      class="btn-details"
+      (click)="selectEmployee(employee())"
+    >
+      View Details
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </button>
+  </div>
+</app-card>

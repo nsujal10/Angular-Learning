@@ -1,0 +1,61 @@
+<div class="search-panel">
+  <!-- Search Input -->
+  <div class="search-input-wrapper">
+    <span class="search-icon">🔍</span>
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Search by name, role, or email..."
+      [(ngModel)]="searchTerm"
+      (input)="onFilterChange()"
+    />
+    @if (searchTerm) {
+      <button type="button" class="clear-btn" (click)="searchTerm = ''; onFilterChange()">✕</button>
+    }
+  </div>
+
+  <!-- Filters Row -->
+  <div class="filter-controls">
+    <div class="select-group">
+      <select
+        class="filter-select"
+        [(ngModel)]="selectedDepartment"
+        (change)="onFilterChange()"
+      >
+        @for (dept of departments(); track dept) {
+          <option [value]="dept">{{ dept }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="select-group">
+      <select
+        class="filter-select"
+        [(ngModel)]="selectedStatus"
+        (change)="onFilterChange()"
+      >
+        <option value="all">All Statuses</option>
+        <option value="active">Active Only</option>
+        <option value="inactive">Inactive Only</option>
+      </select>
+    </div>
+
+    <button
+      type="button"
+      class="btn-reset"
+      (click)="onReset()"
+      title="Reset search & filters"
+    >
+      Reset
+    </button>
+
+    <button
+      type="button"
+      class="btn-add"
+      (click)="triggerAdd()"
+      title="Add new employee (triggers EmployeeCard ngOnInit)"
+    >
+      <span>+</span> Add Employee
+    </button>
+  </div>
+</div>
