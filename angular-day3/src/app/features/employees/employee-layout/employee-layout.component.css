@@ -1,0 +1,61 @@
+.employee-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.layout-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.layout-tabs {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.tab-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.tab-link:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-link.active-tab {
+  color: #fff;
+  background: var(--primary-600);
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.3);
+}
+
+.role-pill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: #334155;
+  color: var(--text-secondary);
+}
+
+.role-pill.admin {
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+.layout-outlet-container {
+  min-height: 400px;
+}

@@ -1,0 +1,136 @@
+<div class="dashboard-container">
+  <!-- Header Banner -->
+  <header class="dash-header">
+    <div>
+      <span class="pill-label">Portal v3 • Analytics & Overview</span>
+      <h1 class="dash-title">Executive Workforce Dashboard</h1>
+      <p class="dash-subtitle">
+        Real-time visibility into organization headcount, compensation structure, and departmental distribution.
+      </p>
+    </div>
+    <div class="dash-actions">
+      <a routerLink="/employees" class="btn btn-outline">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Browse Directory
+      </a>
+      <a routerLink="/employees/new" class="btn btn-primary" *ngIf="authService.isAdmin()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Onboard Employee
+      </a>
+    </div>
+  </header>
+
+  <!-- Metric KPI Cards -->
+  <div class="kpi-grid">
+    <div class="portal-card kpi-card">
+      <div class="kpi-icon-wrap" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Total Employees</span>
+        <div class="kpi-value">{{ stats?.total || 0 }}</div>
+        <span class="kpi-meta text-emerald">Active headcount</span>
+      </div>
+    </div>
+
+    <div class="portal-card kpi-card">
+      <div class="kpi-icon-wrap" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Active Ratio</span>
+        <div class="kpi-value">{{ stats?.active || 0 }} / {{ stats?.total || 0 }}</div>
+        <span class="kpi-meta text-emerald">{{ (stats?.active / (stats?.total || 1) * 100) | number:'1.0-0' }}% Operational</span>
+      </div>
+    </div>
+
+    <div class="portal-card kpi-card">
+      <div class="kpi-icon-wrap" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Annual Payroll</span>
+        <div class="kpi-value">${{ (stats?.totalPayroll || 0) | number:'1.0-0' }}</div>
+        <span class="kpi-meta text-muted">Across all teams</span>
+      </div>
+    </div>
+
+    <div class="portal-card kpi-card">
+      <div class="kpi-icon-wrap" style="background: rgba(236, 72, 153, 0.15); color: #f472b6;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Managers & Leads</span>
+        <div class="kpi-value">{{ stats?.managers || 0 }}</div>
+        <span class="kpi-meta text-muted">Avg: ${{ (stats?.avgSalary || 0) | number:'1.0-0' }}/yr</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Department Distribution Breakdown -->
+  <div class="content-split">
+    <div class="portal-card dept-card">
+      <div class="card-header">
+        <h2 class="card-title">Department Allocation</h2>
+        <span class="badge badge-dept">{{ departments.length }} Departments Active</span>
+      </div>
+      <div class="dept-list">
+        <div class="dept-row" *ngFor="let dept of departments">
+          <div class="dept-meta">
+            <span class="dept-name">{{ dept }}</span>
+            <span class="dept-count">{{ stats?.departmentCounts[dept] }} members ({{ getDepartmentPercentage(stats?.departmentCounts[dept]) }}%)</span>
+          </div>
+          <div class="dept-bar-track">
+            <div class="dept-bar-fill" [style.width.%]="getDepartmentPercentage(stats?.departmentCounts[dept])"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Navigation / Features Tested in Project -->
+    <div class="portal-card checklist-card">
+      <div class="card-header">
+        <h2 class="card-title">Day 3 Concepts Implemented</h2>
+        <span class="badge badge-active">21/21 Ready</span>
+      </div>
+      <ul class="checklist-items">
+        <li>
+          <span class="check-icon">✓</span>
+          <div>
+            <strong>Nested Routes & Layout:</strong>
+            <p><code>/employees</code> with child routes (list, details, new, edit) loaded cleanly.</p>
+          </div>
+        </li>
+        <li>
+          <span class="check-icon">✓</span>
+          <div>
+            <strong>3 Route Guards & 1 Resolver:</strong>
+            <p><code>AuthGuard</code>, <code>AdminGuard</code>, <code>UnsavedChangesGuard</code> & <code>EmployeeResolver</code>.</p>
+          </div>
+        </li>
+        <li>
+          <span class="check-icon">✓</span>
+          <div>
+            <strong>Full Reactive Form Mastery:</strong>
+            <p>Custom email regex, cross-field benchmark checks, FormArray skills, conditional manager fields.</p>
+          </div>
+        </li>
+        <li>
+          <span class="check-icon">✓</span>
+          <div>
+            <strong>URL Query Parameters:</strong>
+            <p>Search, department filtering, status, and pagination synchronized with route URL.</p>
+          </div>
+        </li>
+      </ul>
+      <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem;">
+        <a routerLink="/employees" [queryParams]="{ department: 'Engineering' }" class="btn btn-outline btn-sm">
+          Filter Engineering
+        </a>
+        <a routerLink="/settings" class="btn btn-secondary btn-sm" *ngIf="authService.isAdmin()">
+          Admin Settings Guard Test
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

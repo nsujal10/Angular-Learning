@@ -1,0 +1,125 @@
+<div class="portal-root">
+  <!-- Top Navigation Header -->
+  <header class="portal-navbar">
+    <div class="nav-left">
+      <a routerLink="/dashboard" class="brand-link">
+        <div class="brand-logo-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+        </div>
+        <div class="brand-titles">
+          <span class="brand-name">SpikeHR <span class="v-badge">v3</span></span>
+          <span class="brand-sub">Workforce Portal</span>
+        </div>
+      </a>
+
+      <!-- Primary Nav Links -->
+      <nav class="nav-links" *ngIf="authService.isAuthenticated()">
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="active-nav"
+          class="nav-item"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Dashboard
+        </a>
+        <a
+          routerLink="/employees"
+          routerLinkActive="active-nav"
+          class="nav-item"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Employees
+        </a>
+        <a
+          routerLink="/settings"
+          routerLinkActive="active-nav"
+          class="nav-item"
+          [class.locked]="!authService.isAdmin()"
+          title="{{ !authService.isAdmin() ? 'Admin only (AdminGuard active)' : 'Settings' }}"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Settings
+          <span class="admin-lock-tag" *ngIf="!authService.isAdmin()">🔒 Guarded</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Right Controls: Role Switcher & User Profile -->
+    <div class="nav-right" *ngIf="authService.isAuthenticated()">
+      <!-- Interactive Guard Role Simulator -->
+      <div class="role-tester-widget">
+        <span class="role-tester-lbl">Active Role:</span>
+        <select
+          [ngModel]="authService.currentUser?.role"
+          (ngModelChange)="onRoleChange($event)"
+          class="role-select"
+        >
+          <option value="Admin">Admin (Full)</option>
+          <option value="Manager">Manager</option>
+          <option value="Employee">Employee</option>
+        </select>
+      </div>
+
+      <!-- User Info & Logout -->
+      <div class="user-block">
+        <div class="user-avatar-tag">
+          {{ authService.currentUser?.avatar || 'US' }}
+        </div>
+        <div class="user-meta">
+          <span class="user-name">{{ authService.currentUser?.name }}</span>
+          <span class="user-role-lbl">{{ authService.currentUser?.role }}</span>
+        </div>
+        <button
+          type="button"
+          class="btn-logout"
+          (click)="authService.logout()"
+          title="Sign Out"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sign In CTA if logged out -->
+    <div class="nav-right" *ngIf="!authService.isAuthenticated()">
+      <a routerLink="/login" class="btn btn-primary btn-sm">
+        Sign In
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="portal-main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Floating Toast Notifications Container -->
+  <aside class="toast-stack" aria-live="polite" *ngIf="toasts.length > 0">
+    <div
+      class="toast-item"
+      *ngFor="let toast of toasts"
+      [class.toast-success]="toast.type === 'success'"
+      [class.toast-error]="toast.type === 'error'"
+      [class.toast-warning]="toast.type === 'warning'"
+      [class.toast-info]="toast.type === 'info'"
+    >
+      <div class="toast-icon">
+        <span *ngIf="toast.type === 'success'">✓</span>
+        <span *ngIf="toast.type === 'error'">✕</span>
+        <span *ngIf="toast.type === 'warning'">⚠️</span>
+        <span *ngIf="toast.type === 'info'">ℹ️</span>
+      </div>
+      <div class="toast-body">
+        <h4 class="toast-title">{{ toast.title }}</h4>
+        <p class="toast-desc">{{ toast.message }}</p>
+      </div>
+      <button
+        type="button"
+        class="toast-close"
+        (click)="dismissToast(toast.id)"
+      >
+        ✕
+      </button>
+    </div>
+  </aside>
+</div>

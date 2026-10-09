@@ -1,0 +1,71 @@
+<div class="settings-container">
+  <header class="settings-header">
+    <div>
+      <div class="role-badge">
+        <span>🛡️ Admin Guard Protected Zone</span>
+      </div>
+      <h1 class="page-title">Enterprise System Settings</h1>
+      <p class="page-subtitle">Configure organization-wide policies, security credentials, and access control matrices.</p>
+    </div>
+    <button class="btn btn-primary" (click)="saveSettings()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Save Global Changes
+    </button>
+  </header>
+
+  <div class="settings-grid">
+    <!-- General Settings Card -->
+    <div class="portal-card">
+      <h2 class="section-title">Organization Profile</h2>
+      <div class="form-group">
+        <label class="form-label">Company Legal Name</label>
+        <input type="text" [(ngModel)]="companyName" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Fiscal Budget Year</label>
+        <input type="text" [(ngModel)]="fiscalYear" class="form-control" />
+      </div>
+
+      <div class="toggle-option">
+        <label class="switch-wrap">
+          <input type="checkbox" [(ngModel)]="requireTwoFactor" />
+          <span class="switch-label">Enforce 2FA for all Administrative and Managerial sessions</span>
+        </label>
+      </div>
+
+      <div class="toggle-option">
+        <label class="switch-wrap">
+          <input type="checkbox" [(ngModel)]="allowSelfRegistration" />
+          <span class="switch-label">Allow Employee Self-Registration during onboarding</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Guard Sandbox & Simulation Card -->
+    <div class="portal-card guard-test-card">
+      <h2 class="section-title">Guard Testing Sandbox</h2>
+      <p class="test-desc">
+        You are currently viewing this page because your session role is <strong>{{ authService.currentUser?.role }}</strong>.
+        Click below to simulate a role switch and test how <code>AdminGuard</code> blocks unauthorized routes:
+      </p>
+
+      <div class="guard-actions">
+        <button type="button" class="btn btn-secondary" (click)="testRoleDemote('Employee')">
+          Simulate "Employee" Role (Blocks /settings)
+        </button>
+        <button type="button" class="btn btn-outline" (click)="testRoleDemote('Manager')">
+          Simulate "Manager" Role (Allows list, blocks settings)
+        </button>
+        <button type="button" class="btn btn-primary" (click)="testRoleDemote('Admin')">
+          Restore "Admin" Role (Full Access)
+        </button>
+      </div>
+
+      <div class="guard-explanation">
+        <strong>How it works:</strong>
+        <code>adminGuard</code> checks <code>authService.isAdmin()</code>. If falsy, it automatically intercepts navigation, dispatches an error alert via <code>NotificationService</code>, and redirects immediately to <code>/dashboard</code>.
+      </div>
+    </div>
+  </div>
+</div>

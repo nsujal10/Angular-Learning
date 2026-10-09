@@ -1,0 +1,325 @@
+<div class="form-container">
+  <header class="form-header">
+    <div>
+      <span class="mode-tag">{{ isEditMode ? 'Editing Profile #' + employeeId : 'Onboarding Workflow' }}</span>
+      <h1 class="form-title">{{ isEditMode ? 'Update Employee Profile' : 'Register New Employee' }}</h1>
+      <p class="form-subtitle">
+        Enter employee credentials, verify compensation requirements, and configure departmental access.
+      </p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn btn-outline" (click)="cancel()">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="employeeForm.invalid"
+        (click)="onSubmit()"
+      >
+        {{ isEditMode ? 'Save Profile Changes' : 'Submit New Employee' }}
+      </button>
+    </div>
+  </header>
+
+  <!-- Cross-Field Error Banner (Department vs Salary Benchmark) -->
+  <div class="cross-error-banner" *ngIf="crossFieldErrors?.['salaryBelowBenchmark']">
+    <div class="banner-icon">⚠️</div>
+    <div>
+      <strong>Cross-Field Policy Violation: Department Salary Benchmark</strong>
+      <p>
+        The minimum salary for the <strong>{{ crossFieldErrors?.['salaryBelowBenchmark'].department }}</strong> department is
+        <strong>${{ crossFieldErrors?.['salaryBelowBenchmark'].minExpected | number:'1.0-0' }}</strong>. Current value:
+        ${{ crossFieldErrors?.['salaryBelowBenchmark'].actual | number:'1.0-0' }}.
+      </p>
+    </div>
+  </div>
+
+  <!-- Cross-Field Error Banner (Manager Team Size) -->
+  <div class="cross-error-banner" *ngIf="crossFieldErrors?.['managerRequiresTeamSize']">
+    <div class="banner-icon">⚠️</div>
+    <div>
+      <strong>Cross-Field Policy Violation: Manager Direct Reports</strong>
+      <p>When marked as a Manager / Team Lead, the employee must supervise at least 1 direct report.</p>
+    </div>
+  </div>
+
+  <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="form-layout">
+    <!-- Section 1: Basic Identity -->
+    <div class="portal-card form-section">
+      <h2 class="section-heading">1. Identity &amp; Contact Details</h2>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="emp-name">
+            Full Name <span class="req">*</span>
+          </label>
+          <input
+            id="emp-name"
+            type="text"
+            formControlName="name"
+            class="form-control"
+            [class.is-invalid]="f['name'].touched && f['name'].invalid"
+            placeholder="e.g. Sujal Nage"
+          />
+          <div class="invalid-feedback" *ngIf="f['name'].touched && f['name'].errors?.['required']">
+            Full name is required.
+          </div>
+          <div class="invalid-feedback" *ngIf="f['name'].touched && f['name'].errors?.['minlength']">
+            Full name must have at least 3 characters.
+          </div>
+          <div class="invalid-feedback" *ngIf="f['name'].touched && f['name'].errors?.['invalidNameFormat']">
+            {{ f['name'].errors?.['invalidNameFormat'] }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="emp-email">
+            Corporate Email <span class="req">*</span>
+          </label>
+          <input
+            id="emp-email"
+            type="email"
+            formControlName="email"
+            class="form-control"
+            [class.is-invalid]="f['email'].touched && f['email'].invalid"
+            placeholder="name@spikeoffice.io"
+          />
+          <div class="invalid-feedback" *ngIf="f['email'].touched && f['email'].errors?.['required']">
+            Corporate email is required.
+          </div>
+          <div class="invalid-feedback" *ngIf="f['email'].touched && f['email'].errors?.['invalidCorporateDomain']">
+            Email must end with corporate domain <strong>&#64;spikeoffice.io</strong>.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="emp-phone">
+            Direct Contact Number
+          </label>
+          <input
+            id="emp-phone"
+            type="text"
+            formControlName="phone"
+            class="form-control"
+            [class.is-invalid]="f['phone'].touched && f['phone'].invalid"
+            placeholder="+1 (555) 000-0000"
+          />
+          <div class="invalid-feedback" *ngIf="f['phone'].touched && f['phone'].errors?.['pattern']">
+            Enter a valid phone number (e.g. +1 555-123-4567).
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="emp-joindate">
+            Official Join Date <span class="req">*</span>
+          </label>
+          <input
+            id="emp-joindate"
+            type="date"
+            formControlName="joinDate"
+            class="form-control"
+            [class.is-invalid]="f['joinDate'].touched && f['joinDate'].invalid"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Department & Compensation -->
+    <div class="portal-card form-section">
+      <h2 class="section-heading">2. Organizational Placement &amp; Compensation</h2>
+
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label class="form-label" for="emp-department">
+            Department <span class="req">*</span>
+          </label>
+          <select
+            id="emp-department"
+            formControlName="department"
+            class="form-control"
+          >
+            <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+          </select>
+          <small class="form-hint">Benchmark: Engineering ($70k), Product ($68k), Finance ($65k)</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="emp-role">
+            Job Title / Role <span class="req">*</span>
+          </label>
+          <input
+            id="emp-role"
+            type="text"
+            formControlName="role"
+            class="form-control"
+            [class.is-invalid]="f['role'].touched && f['role'].invalid"
+            placeholder="e.g. Senior Frontend Developer"
+          />
+          <div class="invalid-feedback" *ngIf="f['role'].touched && f['role'].errors?.['required']">
+            Job role is required.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="emp-salary">
+            Annual Base Salary ($) <span class="req">*</span>
+          </label>
+          <input
+            id="emp-salary"
+            type="number"
+            step="1000"
+            formControlName="salary"
+            class="form-control"
+            [class.is-invalid]="f['salary'].touched && (f['salary'].invalid || crossFieldErrors?.['salaryBelowBenchmark'])"
+          />
+          <div class="invalid-feedback" *ngIf="f['salary'].touched && f['salary'].errors?.['min']">
+            Minimum salary is $30,000.
+          </div>
+          <div class="invalid-feedback" *ngIf="f['salary'].touched && f['salary'].errors?.['max']">
+            Maximum salary is $500,000.
+          </div>
+        </div>
+      </div>
+
+      <div class="status-toggle-wrap">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="active" />
+          <span>Active Employee Account Status</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Section 3: Managerial Conditional Fields -->
+    <div class="portal-card form-section manager-box">
+      <div class="manager-header">
+        <div>
+          <h2 class="section-heading" style="margin-bottom: 0;">3. Management &amp; Leadership Oversight</h2>
+          <p class="form-hint">Toggle below to conditionally reveal manager-specific metrics</p>
+        </div>
+        <label class="manager-switch">
+          <input type="checkbox" formControlName="isManager" />
+          <span class="switch-badge">Is People Manager?</span>
+        </label>
+      </div>
+
+      <div class="manager-fields-grid" *ngIf="f['isManager'].value">
+        <div class="form-group">
+          <label class="form-label" for="emp-teamsize">
+            Supervised Team Size (Reports) <span class="req">*</span>
+          </label>
+          <input
+            id="emp-teamsize"
+            type="number"
+            min="1"
+            formControlName="teamSize"
+            class="form-control"
+            [class.is-invalid]="f['teamSize'].touched && f['teamSize'].invalid"
+          />
+          <div class="invalid-feedback" *ngIf="f['teamSize'].touched && f['teamSize'].errors?.['required']">
+            Team size is required for managers.
+          </div>
+          <div class="invalid-feedback" *ngIf="f['teamSize'].touched && f['teamSize'].errors?.['min']">
+            Must manage at least 1 person.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="emp-bonus">
+            Annual Leadership Bonus ($)
+          </label>
+          <input
+            id="emp-bonus"
+            type="number"
+            step="500"
+            formControlName="managerBonus"
+            class="form-control"
+            placeholder="0"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Dynamic Skills using FormArray -->
+    <div class="portal-card form-section">
+      <div class="skills-head">
+        <div>
+          <h2 class="section-heading" style="margin-bottom: 0;">4. Dynamic Skills &amp; Competencies (FormArray)</h2>
+          <p class="form-hint">Add key technologies or qualifications (Minimum 1 skill required)</p>
+        </div>
+        <div class="add-skill-box">
+          <input
+            #newSkillInput
+            type="text"
+            class="form-control skill-input"
+            placeholder="Type skill & press Enter or Add..."
+            (keydown.enter)="$event.preventDefault(); addSkill(newSkillInput.value); newSkillInput.value = ''"
+          />
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            (click)="addSkill(newSkillInput.value); newSkillInput.value = ''"
+          >
+            + Add Skill
+          </button>
+        </div>
+      </div>
+
+      <!-- Skills Chip Grid -->
+      <div class="skills-container" *ngIf="skillsArray.controls.length > 0">
+        <div class="skill-tag-item" *ngFor="let skillCtrl of skillsArray.controls; let i = index">
+          <span>{{ skillCtrl.value }}</span>
+          <button
+            type="button"
+            class="skill-remove-btn"
+            (click)="removeSkill(i)"
+            title="Remove skill"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <div class="invalid-feedback" *ngIf="skillsArray.touched && skillsArray.length === 0">
+        At least one professional skill is required.
+      </div>
+    </div>
+
+    <!-- Section 5: Additional Notes -->
+    <div class="portal-card form-section">
+      <h2 class="section-heading">5. Professional Notes &amp; Bio</h2>
+      <div class="form-group">
+        <textarea
+          rows="3"
+          formControlName="notes"
+          class="form-control"
+          placeholder="Enter career summary, onboarding notes, or internal credentials..."
+        ></textarea>
+        <div class="char-count">Max 300 characters</div>
+      </div>
+    </div>
+
+    <!-- Bottom Submission Bar -->
+    <div class="form-footer">
+      <div class="dirty-status">
+        <span *ngIf="employeeForm.dirty" class="status-dirty">● Unsaved edits present (CanDeactivate guard active)</span>
+        <span *ngIf="!employeeForm.dirty" class="status-clean">✓ Form clean / synced</span>
+      </div>
+
+      <div class="footer-buttons">
+        <button type="button" class="btn btn-outline" (click)="cancel()">
+          Cancel &amp; Discard
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="employeeForm.invalid"
+        >
+          {{ isEditMode ? 'Save Profile Changes' : 'Confirm & Create Employee' }}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

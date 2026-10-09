@@ -1,0 +1,122 @@
+<div class="details-container" *ngIf="employee">
+  <!-- Top Bar with Back and Actions -->
+  <div class="details-topbar">
+    <a routerLink="/employees" class="btn btn-outline btn-sm">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      Back to Directory
+    </a>
+
+    <div class="topbar-actions">
+      <!-- Route Resolver Indicator -->
+      <span class="resolver-tag" *ngIf="resolverUsed">
+        ⚡ Data Pre-Fetched via EmployeeResolver
+      </span>
+
+      <a
+        [routerLink]="['/employees', employee.id, 'edit']"
+        class="btn btn-primary btn-sm"
+        *ngIf="authService.isAdmin() || authService.isManager()"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Edit Employee Profile
+      </a>
+
+      <button
+        type="button"
+        class="btn btn-danger btn-sm"
+        *ngIf="authService.isAdmin()"
+        (click)="deleteProfile()"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+
+  <!-- Profile Hero Header -->
+  <div class="portal-card profile-hero">
+    <div class="hero-main">
+      <div class="profile-avatar">
+        {{ employee.name.substring(0, 2).toUpperCase() }}
+      </div>
+      <div class="hero-details">
+        <div class="hero-title-row">
+          <h1>{{ employee.name }}</h1>
+          <span
+            class="badge"
+            [class.badge-active]="employee.active"
+            [class.badge-inactive]="!employee.active"
+          >
+            {{ employee.active ? '● Active Staff' : '○ Inactive' }}
+          </span>
+          <span *ngIf="employee.isManager" class="badge badge-manager">
+            👑 Leadership / Manager
+          </span>
+        </div>
+        <p class="hero-role-dept">
+          {{ employee.role }} • <span class="text-indigo">{{ employee.department }}</span>
+        </p>
+        <div class="hero-contacts">
+          <span>📧 {{ employee.email }}</span>
+          <span *ngIf="employee.phone">📞 {{ employee.phone }}</span>
+          <span>📅 Joined {{ employee.joinDate }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-quick-stat">
+      <span class="salary-caption">Annual Base Compensation</span>
+      <span class="salary-number">${{ employee.salary | number:'1.0-0' }}</span>
+      <button class="btn btn-outline btn-sm status-toggle-btn" (click)="toggleStatus()">
+        Set as {{ employee.active ? 'Inactive' : 'Active' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Profile Details Breakdown Grid -->
+  <div class="details-grid">
+    <!-- Skills & Expertise Card -->
+    <div class="portal-card">
+      <h2 class="card-section-title">Verified Skills &amp; Proficiencies</h2>
+      <div class="skills-wrap">
+        <span class="skill-tag" *ngFor="let skill of employee.skills">
+          {{ skill }}
+        </span>
+      </div>
+      <p class="section-note" *ngIf="employee.skills.length === 0">
+        No technical skills registered on this profile.
+      </p>
+
+      <div class="notes-block" *ngIf="employee.notes">
+        <h3 class="notes-subtitle">Performance &amp; Role Notes</h3>
+        <p class="notes-content">{{ employee.notes }}</p>
+      </div>
+    </div>
+
+    <!-- Managerial & Compensation Overview Card -->
+    <div class="portal-card">
+      <h2 class="card-section-title">Department &amp; Organizational Structure</h2>
+      <div class="info-list">
+        <div class="info-item">
+          <span class="info-key">Employee ID</span>
+          <span class="info-val font-mono">#EMP-00{{ employee.id }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-key">Assigned Department</span>
+          <span class="info-val">{{ employee.department }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-key">Managerial Designation</span>
+          <span class="info-val">{{ employee.isManager ? 'Yes (Team Lead / Head)' : 'No (Individual Contributor)' }}</span>
+        </div>
+        <div class="info-item" *ngIf="employee.isManager">
+          <span class="info-key">Direct Reports (Team Size)</span>
+          <span class="info-val font-bold">{{ employee.teamSize }} team members</span>
+        </div>
+        <div class="info-item" *ngIf="employee.isManager && employee.managerBonus">
+          <span class="info-key">Annual Leadership Bonus</span>
+          <span class="info-val text-emerald font-mono">+${{ employee.managerBonus | number:'1.0-0' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
