@@ -1,0 +1,39 @@
+<div class="forbidden-wrapper">
+  <div class="portal-card forbidden-card">
+    <div class="forbidden-shield">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+
+    <span class="status-badge">HTTP 403 • FORBIDDEN</span>
+    <h1 class="forbidden-title">Access Restricted</h1>
+    <p class="forbidden-message">
+      You do not have the required permissions to perform this operation or access this resource.
+    </p>
+
+    <div class="session-info">
+      <div class="info-row">
+        <span>Current Active User:</span>
+        <strong>{{ authService.currentUser?.name || 'Anonymous' }} ({{ authService.currentUser?.email }})</strong>
+      </div>
+      <div class="info-row">
+        <span>Assigned Role:</span>
+        <span class="badge" [class.badge-admin]="authService.isAdmin()" [class.badge-manager]="authService.isManager()">
+          {{ authService.currentUser?.role || 'None' }}
+        </span>
+      </div>
+      <div class="info-row">
+        <span>Required Role:</span>
+        <span class="text-rose">Admin / Manager</span>
+      </div>
+    </div>
+
+    <div class="forbidden-actions">
+      <a routerLink="/dashboard" class="btn btn-primary">
+        Return to Dashboard
+      </a>
+      <a routerLink="/login" class="btn btn-outline" (click)="authService.logout()">
+        Switch Account
+      </a>
+    </div>
+  </div>
+</div>

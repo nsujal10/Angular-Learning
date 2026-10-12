@@ -1,0 +1,130 @@
+<div class="details-shell">
+  <!-- Top Bar -->
+  <div class="details-topbar">
+    <a routerLink="/employees" class="btn btn-outline btn-sm">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      Back to Directory
+    </a>
+
+    <div class="topbar-actions" *ngIf="employee">
+      <a
+        [routerLink]="['/employees', employee.id, 'edit']"
+        class="btn btn-primary btn-sm"
+        *ngIf="authService.isAdmin() || authService.isManager()"
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Edit Profile
+      </a>
+
+      <button
+        type="button"
+        class="btn btn-danger btn-sm"
+        (click)="deleteProfile()"
+        [title]="authService.isAdmin() ? 'Delete Employee' : 'Admin only (Test 403 authorization check)'"
+      >
+        Delete Staff
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State Shimmer -->
+  <div class="portal-card" *ngIf="isLoading">
+    <div style="display: flex; gap: 1.5rem; align-items: center; margin-bottom: 2rem;">
+      <div class="shimmer-block" style="width: 76px; height: 76px; border-radius: 20px;"></div>
+      <div style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
+        <div class="shimmer-block" style="width: 250px; height: 26px;"></div>
+        <div class="shimmer-block" style="width: 180px; height: 16px;"></div>
+      </div>
+    </div>
+    <div class="shimmer-block" style="height: 120px;"></div>
+  </div>
+
+  <!-- Error / 404 State -->
+  <div class="portal-card error-box" *ngIf="errorMessage && !isLoading">
+    <div class="err-icon">⚠️</div>
+    <h3>Resource Not Found</h3>
+    <p>{{ errorMessage }}</p>
+    <a routerLink="/employees" class="btn btn-secondary btn-sm" style="margin-top: 1rem;">
+      Return to Directory
+    </a>
+  </div>
+
+  <!-- Main Profile Content -->
+  <ng-container *ngIf="employee && !isLoading">
+    <div class="portal-card profile-hero">
+      <div class="hero-main">
+        <div class="avatar-box">
+          {{ employee.name.substring(0, 2).toUpperCase() }}
+        </div>
+        <div class="hero-info">
+          <div class="hero-name-row">
+            <h1>{{ employee.name }}</h1>
+            <span class="badge" [class.badge-active]="employee.active" [class.badge-inactive]="!employee.active">
+              {{ employee.active ? '● Active' : '○ Inactive' }}
+            </span>
+            <span *ngIf="employee.isManager" class="badge badge-manager">👑 Manager</span>
+          </div>
+          <p class="role-dept">
+            {{ employee.role }} • <span class="dept-text">{{ employee.department }}</span>
+          </p>
+          <div class="meta-row">
+            <span>📧 {{ employee.email }}</span>
+            <span *ngIf="employee.phone">📞 {{ employee.phone }}</span>
+            <span>📅 Joined {{ employee.joinDate }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="salary-box">
+        <span class="salary-caption">Annual Base Compensation</span>
+        <span class="salary-val">${{ employee.salary | number:'1.0-0' }}</span>
+        <button class="btn btn-outline btn-sm" (click)="toggleStatus()">
+          Set as {{ employee.active ? 'Inactive' : 'Active' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="details-grid">
+      <!-- Skills -->
+      <div class="portal-card">
+        <h2 class="section-title">Verified Competencies</h2>
+        <div class="skills-wrap">
+          <span class="skill-chip" *ngFor="let s of employee.skills">
+            {{ s }}
+          </span>
+        </div>
+        <div class="notes-wrap" *ngIf="employee.notes">
+          <h4>Performance &amp; Role Notes</h4>
+          <p>{{ employee.notes }}</p>
+        </div>
+      </div>
+
+      <!-- Organizational Structure -->
+      <div class="portal-card">
+        <h2 class="section-title">Organizational Structure</h2>
+        <div class="structure-list">
+          <div class="struct-item">
+            <span>Internal ID</span>
+            <code>#EMP-00{{ employee.id }}</code>
+          </div>
+          <div class="struct-item">
+            <span>Department</span>
+            <strong>{{ employee.department }}</strong>
+          </div>
+          <div class="struct-item">
+            <span>Leadership Track</span>
+            <span>{{ employee.isManager ? 'People Manager' : 'Individual Contributor' }}</span>
+          </div>
+          <div class="struct-item" *ngIf="employee.isManager">
+            <span>Direct Reports</span>
+            <strong class="text-cyan">{{ employee.teamSize }} staff members</strong>
+          </div>
+          <div class="struct-item" *ngIf="employee.isManager && employee.managerBonus">
+            <span>Leadership Bonus</span>
+            <span class="text-emerald">+${{ employee.managerBonus | number:'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

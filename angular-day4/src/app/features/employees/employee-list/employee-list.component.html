@@ -1,0 +1,265 @@
+<div class="list-container">
+  <!-- Query & Filter Toolbar -->
+  <div class="portal-card filter-card">
+    <div class="filter-row">
+      <!-- Search Box with Live Debounce -->
+      <div class="search-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input
+          type="text"
+          [ngModel]="search"
+          (ngModelChange)="onSearchInput($event)"
+          placeholder="Filter by name, email, role, or skill..."
+          class="form-control filter-input"
+        />
+        <button *ngIf="search" class="clear-btn" (click)="resetFilters()">✕</button>
+      </div>
+
+      <!-- Department Filter -->
+      <div class="filter-group">
+        <label class="filter-lbl">Department:</label>
+        <select
+          [(ngModel)]="department"
+          (change)="updateFilters()"
+          class="form-control select-input"
+        >
+          <option value="All">All Departments</option>
+          <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="filter-group">
+        <label class="filter-lbl">Status:</label>
+        <select
+          [(ngModel)]="status"
+          (change)="updateFilters()"
+          class="form-control select-input"
+        >
+          <option value="all">All Statuses</option>
+          <option value="active">Active Only</option>
+          <option value="inactive">Inactive Only</option>
+        </select>
+      </div>
+
+      <!-- Reset Filter Button -->
+      <button class="btn btn-outline btn-sm" (click)="resetFilters()">
+        Reset Filters
+      </button>
+    </div>
+
+    <!-- Live Sync URL Parameters Badge -->
+    <div class="query-sync-meta">
+      <span>Query Synced:</span>
+      <code>/api/employees?search={{ search || "''" }}&amp;department={{ department }}&amp;status={{ status }}&amp;page={{ page }}&amp;sortBy={{ sortBy }}</code>
+    </div>
+  </div>
+
+  <!-- Error Alert Banner -->
+  <div class="portal-card error-banner" *ngIf="errorMessage && !isLoading">
+    <div class="error-text">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>{{ errorMessage }}</span>
+    </div>
+    <button class="btn btn-secondary btn-sm" (click)="loadEmployees()">Retry Request</button>
+  </div>
+
+  <!-- Employees Table Card -->
+  <div class="portal-card table-card">
+    <div class="table-responsive">
+      <table class="emp-table">
+        <thead>
+          <tr>
+            <th (click)="toggleSort('name')" class="sortable-th">
+              Staff Member
+              <span class="sort-icon" *ngIf="sortBy === 'name'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
+            </th>
+            <th (click)="toggleSort('department')" class="sortable-th">
+              Department
+              <span class="sort-icon" *ngIf="sortBy === 'department'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
+            </th>
+            <th>Role &amp; Responsibilities</th>
+            <th (click)="toggleSort('salary')" class="sortable-th">
+              Salary
+              <span class="sort-icon" *ngIf="sortBy === 'salary'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span>
+            </th>
+            <th>Status</th>
+            <th>Verified Skills</th>
+            <th class="th-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Loading Skeleton State -->
+          <ng-container *ngIf="isLoading">
+            <tr *ngFor="let s of [1,2,3,4,5]">
+              <td>
+                <div class="emp-identity">
+                  <div class="shimmer-block" style="width: 38px; height: 38px; border-radius: 50%;"></div>
+                  <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <div class="shimmer-block" style="width: 120px; height: 16px;"></div>
+                    <div class="shimmer-block" style="width: 160px; height: 12px;"></div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="shimmer-block" style="width: 90px; height: 24px; border-radius: 999px;"></div></td>
+              <td><div class="shimmer-block" style="width: 130px; height: 16px;"></div></td>
+              <td><div class="shimmer-block" style="width: 80px; height: 16px;"></div></td>
+              <td><div class="shimmer-block" style="width: 70px; height: 24px; border-radius: 999px;"></div></td>
+              <td><div class="shimmer-block" style="width: 140px; height: 20px;"></div></td>
+              <td><div class="shimmer-block" style="width: 80px; height: 30px;"></div></td>
+            </tr>
+          </ng-container>
+
+          <!-- Normal Data Rows -->
+          <ng-container *ngIf="!isLoading">
+            <tr *ngFor="let emp of employees" [class.inactive-row]="!emp.active">
+              <td>
+                <div class="emp-identity">
+                  <div class="avatar-circle">
+                    {{ emp.name.substring(0, 2).toUpperCase() }}
+                  </div>
+                  <div>
+                    <a [routerLink]="['/employees', emp.id]" class="emp-name-link">
+                      {{ emp.name }}
+                    </a>
+                    <span class="emp-email">{{ emp.email }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge badge-dept">{{ emp.department }}</span>
+              </td>
+              <td>
+                <div class="role-cell">
+                  <span>{{ emp.role }}</span>
+                  <span *ngIf="emp.isManager" class="badge badge-manager">Manager</span>
+                </div>
+              </td>
+              <td class="salary-cell">
+                ${{ emp.salary | number:'1.0-0' }}
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="badge-toggle"
+                  [class.badge-active]="emp.active"
+                  [class.badge-inactive]="!emp.active"
+                  (click)="toggleStatus(emp)"
+                  title="Click to toggle active status via PATCH /api/employees/:id"
+                >
+                  {{ emp.active ? 'Active' : 'Inactive' }}
+                </button>
+              </td>
+              <td>
+                <div class="skills-cell">
+                  <span class="skill-pill" *ngFor="let skill of emp.skills.slice(0, 2)">
+                    {{ skill }}
+                  </span>
+                  <span class="skill-more" *ngIf="emp.skills.length > 2">
+                    +{{ emp.skills.length - 2 }}
+                  </span>
+                </div>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <a
+                    [routerLink]="['/employees', emp.id]"
+                    class="action-btn btn-view"
+                    title="View Profile"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </a>
+
+                  <a
+                    [routerLink]="['/employees', emp.id, 'edit']"
+                    class="action-btn btn-edit"
+                    *ngIf="authService.isAdmin() || authService.isManager()"
+                    title="Edit Profile"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  </a>
+
+                  <!-- Delete Button: If user is non-admin, triggers backend 403 test! -->
+                  <button
+                    type="button"
+                    class="action-btn btn-delete"
+                    (click)="openDeleteModal(emp)"
+                    [title]="authService.isAdmin() ? 'Delete Employee' : 'Admin only (Click to test 403 forbidden rejection!)'"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Empty State -->
+            <tr *ngIf="employees.length === 0">
+              <td colspan="7" class="empty-cell">
+                <div class="empty-state">
+                  <div class="empty-icon">📁</div>
+                  <h3>No Records Found</h3>
+                  <p>No employees match your filter criteria or the directory is empty.</p>
+                  <button class="btn btn-outline btn-sm" (click)="resetFilters()">Clear Filters</button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls Footer -->
+    <div class="pagination-footer">
+      <div class="page-meta">
+        Showing <strong>{{ employees.length }}</strong> of <strong>{{ totalCount }}</strong> registered staff
+      </div>
+      <div class="page-controls">
+        <button
+          class="btn btn-outline btn-sm"
+          [disabled]="page <= 1 || isLoading"
+          (click)="changePage(page - 1)"
+        >
+          Previous
+        </button>
+        <span class="page-indicator">Page {{ page }} of {{ totalPages }}</span>
+        <button
+          class="btn btn-outline btn-sm"
+          [disabled]="page >= totalPages || isLoading"
+          (click)="changePage(page + 1)"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal Dialog -->
+  <div class="modal-backdrop" *ngIf="employeeToDelete">
+    <div class="modal-box portal-card">
+      <div class="modal-header">
+        <div class="modal-warn-icon">⚠️</div>
+        <h3>Confirm Permanent Deletion</h3>
+      </div>
+      <div class="modal-body">
+        <p>
+          Are you sure you want to delete employee <strong>{{ employeeToDelete.name }}</strong> (ID #{{ employeeToDelete.id }})?
+        </p>
+        <p class="modal-sub">
+          This operation will issue <code>DELETE /api/employees/{{ employeeToDelete.id }}</code>.
+          <span *ngIf="!authService.isAdmin()" class="text-rose">
+            Note: Your current role is <strong>{{ authService.currentUser?.role }}</strong>. The backend will reject this request with HTTP 403 Forbidden!
+          </span>
+        </p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" (click)="closeDeleteModal()" [disabled]="isDeleting">
+          Cancel
+        </button>
+        <button class="btn btn-danger" (click)="confirmDelete()" [disabled]="isDeleting">
+          <span *ngIf="!isDeleting">Confirm Delete</span>
+          <span *ngIf="isDeleting" class="spinner"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

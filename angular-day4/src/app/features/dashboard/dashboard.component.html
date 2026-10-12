@@ -1,0 +1,184 @@
+<div class="dash-wrapper">
+  <!-- Top Greeting & Header -->
+  <header class="dash-header">
+    <div>
+      <div class="api-status-badge">
+        <span class="pulse-dot"></span>
+        <span>Connected to REST API (Node Port 3000)</span>
+      </div>
+      <h1 class="dash-title">Workforce Analytics Hub</h1>
+      <p class="dash-sub">
+        Real-time telemetry retrieved via Angular HttpClient from backend endpoints with JWT session interceptors.
+      </p>
+    </div>
+
+    <div class="dash-actions">
+      <button class="btn btn-secondary btn-sm" (click)="fetchMetrics()" [disabled]="isLoading">
+        <span *ngIf="!isLoading">↻ Refresh Data</span>
+        <span *ngIf="isLoading" class="spinner"></span>
+      </button>
+      <a routerLink="/employees" class="btn btn-primary btn-sm">
+        Browse Employee Directory
+      </a>
+    </div>
+  </header>
+
+  <!-- Step 5: Failure Simulation Sandbox Banner -->
+  <section class="portal-card sandbox-card">
+    <div class="sandbox-head">
+      <div class="sandbox-title">
+        <span class="warning-icon">🧪</span>
+        <strong>Step 5 — Failure Scenarios Testing Console:</strong>
+      </div>
+      <span class="sandbox-badge">Interactive Test Lab</span>
+    </div>
+    <p class="sandbox-desc">
+      Click any scenario below to verify interceptor resilience, token renewal, authorization protection, and error toasts:
+    </p>
+    <div class="sandbox-btns">
+      <button
+        type="button"
+        class="test-btn"
+        [class.active-offline]="simulationService.isOffline$ | async"
+        (click)="testOfflineToggle()"
+      >
+        🔌 {{ (simulationService.isOffline$ | async) ? 'Reconnect Online' : 'Simulate Backend Offline' }}
+      </button>
+
+      <button type="button" class="test-btn" (click)="testExpireAccessToken()">
+        ⏰ Expire Access Token (Test Auto-Refresh)
+      </button>
+
+      <button type="button" class="test-btn" (click)="testInvalidateRefreshToken()">
+        🚫 Corrupt Refresh Token (Test Session Invalidation)
+      </button>
+
+      <button type="button" class="test-btn" (click)="testTrigger500()">
+        💥 Trigger Server 500 Error
+      </button>
+
+      <button type="button" class="test-btn" (click)="testNonExistent404()">
+        🔍 Fetch Non-Existent Employee (404)
+      </button>
+    </div>
+  </section>
+
+  <!-- Error Alert if API call failed -->
+  <div class="portal-card error-card" *ngIf="errorMessage">
+    <p>⚠️ {{ errorMessage }}</p>
+    <button class="btn btn-secondary btn-sm" (click)="fetchMetrics()">Retry Request</button>
+  </div>
+
+  <!-- KPI Metric Grid -->
+  <div class="kpi-grid">
+    <div class="portal-card kpi-card">
+      <div class="kpi-icon-wrap" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Active Headcount</span>
+        <div class="kpi-value" *ngIf="!isLoading">{{ totalEmployees }}</div>
+        <div class="shimmer-block" style="width: 60px; height: 32px;" *ngIf="isLoading"></div>
+        <span class="kpi-meta text-emerald">{{ activeCount }} operational</span>
+      </div>
+    </div>
+
+    <div class="portal-card kpi-card">
+      <div class="kpi-icon-wrap" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Operational Ratio</span>
+        <div class="kpi-value" *ngIf="!isLoading">
+          {{ (activeCount / (totalEmployees || 1) * 100) | number:'1.0-0' }}%
+        </div>
+        <div class="shimmer-block" style="width: 70px; height: 32px;" *ngIf="isLoading"></div>
+        <span class="kpi-meta text-emerald">Healthy staff retention</span>
+      </div>
+    </div>
+
+    <div class="portal-card kpi-card">
+      <div class="kpi-icon-wrap" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Annual Payroll</span>
+        <div class="kpi-value" *ngIf="!isLoading">${{ totalPayroll | number:'1.0-0' }}</div>
+        <div class="shimmer-block" style="width: 100px; height: 32px;" *ngIf="isLoading"></div>
+        <span class="kpi-meta text-dim">Avg: ${{ avgSalary | number:'1.0-0' }}/yr</span>
+      </div>
+    </div>
+
+    <div class="portal-card kpi-card">
+      <div class="kpi-icon-wrap" style="background: rgba(236, 72, 153, 0.15); color: #f472b6;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Team Leaders</span>
+        <div class="kpi-value" *ngIf="!isLoading">{{ managerCount }}</div>
+        <div class="shimmer-block" style="width: 50px; height: 32px;" *ngIf="isLoading"></div>
+        <span class="kpi-meta text-dim">Managers with reports</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Split: Department Breakdown & Architecture Summary -->
+  <div class="content-split">
+    <div class="portal-card">
+      <h2 class="card-title">Live Department Distribution</h2>
+      <div class="dept-list" *ngIf="!isLoading">
+        <div class="dept-row" *ngFor="let dept of deptKeys">
+          <div class="dept-meta">
+            <span class="dept-name">{{ dept }}</span>
+            <span class="dept-count">
+              {{ departmentCounts[dept] }} members ({{ getDeptPercent(departmentCounts[dept]) }}%)
+            </span>
+          </div>
+          <div class="dept-track">
+            <div class="dept-bar" [style.width.%]="getDeptPercent(departmentCounts[dept])"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="shimmer-block" style="height: 18px; margin-bottom: 12px;"></div>
+        <div class="shimmer-block" style="height: 18px; margin-bottom: 12px;"></div>
+        <div class="shimmer-block" style="height: 18px;"></div>
+      </div>
+    </div>
+
+    <div class="portal-card">
+      <h2 class="card-title">Day 4 Architectural Upgrades</h2>
+      <ul class="features-list">
+        <li>
+          <span class="check-icon">✓</span>
+          <div>
+            <strong>Real Backend Integration:</strong>
+            <p>Node.js HTTP REST server listening on port 3000 mapped via <code>proxy.conf.json</code>.</p>
+          </div>
+        </li>
+        <li>
+          <span class="check-icon">✓</span>
+          <div>
+            <strong>HTTP Interceptor with Token Rotation:</strong>
+            <p>Attaches Bearer tokens, intercepts 401s, silently requests <code>/api/auth/refresh</code>, and transparently retries requests.</p>
+          </div>
+        </li>
+        <li>
+          <span class="check-icon">✓</span>
+          <div>
+            <strong>Authorization Enforcement:</strong>
+            <p>Backend rejects deletions from non-admins with HTTP 403; Angular routes them to <code>/forbidden</code>.</p>
+          </div>
+        </li>
+        <li>
+          <span class="check-icon">✓</span>
+          <div>
+            <strong>UX Resilience:</strong>
+            <p>Loading states, empty states, error recovery, and confirmation modals.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

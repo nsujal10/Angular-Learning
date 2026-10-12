@@ -1,0 +1,73 @@
+<div class="settings-wrapper">
+  <header class="settings-header">
+    <div>
+      <span class="badge badge-admin">👑 AdminGuard Protected Zone</span>
+      <h1 class="header-title">Enterprise Security &amp; Access Controls</h1>
+      <p class="header-sub">
+        Configure authentication policies, token refresh windows, and global employee lifecycle rules.
+      </p>
+    </div>
+    <button class="btn btn-primary" (click)="savePolicy()">
+      Save Security Policies
+    </button>
+  </header>
+
+  <div class="settings-grid">
+    <div class="portal-card">
+      <h2 class="card-title">Token Lifecycle &amp; Session Management</h2>
+      <div class="form-group">
+        <label class="form-label">Access Token Expiry (Minutes)</label>
+        <input type="number" [(ngModel)]="sessionTimeoutMinutes" class="form-control" />
+        <small class="form-hint">Short-lived access tokens (15m) automatically renewed via refresh token rotation.</small>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Audit Log Retention (Years)</label>
+        <input type="number" [(ngModel)]="retentionYears" class="form-control" />
+      </div>
+
+      <div class="toggle-row">
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="enforce2FA" />
+          <span>Require Multi-Factor Authentication for all Admin sessions</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="portal-card info-card">
+      <h2 class="card-title">Role-Based Access Matrix</h2>
+      <div class="role-table-wrap">
+        <table class="role-table">
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>List / View</th>
+              <th>Create / Edit</th>
+              <th>Delete Staff</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-admin">Admin</span></td>
+              <td class="text-green">✓ Allowed</td>
+              <td class="text-green">✓ Allowed</td>
+              <td class="text-green">✓ Allowed</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-manager">Manager</span></td>
+              <td class="text-green">✓ Allowed</td>
+              <td class="text-green">✓ Allowed</td>
+              <td class="text-rose">✕ 403 Forbidden</td>
+            </tr>
+            <tr>
+              <td><span class="badge">Employee</span></td>
+              <td class="text-green">✓ Allowed</td>
+              <td class="text-rose">✕ 403 Forbidden</td>
+              <td class="text-rose">✕ 403 Forbidden</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

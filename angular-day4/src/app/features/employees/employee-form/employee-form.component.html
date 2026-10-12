@@ -1,0 +1,271 @@
+<div class="form-wrapper">
+  <header class="form-header">
+    <div>
+      <span class="mode-badge">{{ isEditMode ? 'Editing Profile #' + employeeId : 'REST Onboarding Workflow' }}</span>
+      <h1 class="form-title">{{ isEditMode ? 'Update Employee Profile' : 'Onboard New Employee' }}</h1>
+      <p class="form-sub">
+        Persists directly to backend database via <code>{{ isEditMode ? 'PATCH /api/employees/:id' : 'POST /api/employees' }}</code>.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="employeeForm.invalid || isSubmitting"
+        (click)="onSubmit()"
+      >
+        <span *ngIf="!isSubmitting">{{ isEditMode ? 'Save Changes' : 'Create Employee' }}</span>
+        <span *ngIf="isSubmitting" class="spinner"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Server-Side Error Alert -->
+  <div class="server-error-banner" *ngIf="serverErrorMsg">
+    <div class="banner-icon">⚠️</div>
+    <div>
+      <strong>Backend API Validation Error:</strong>
+      <p>{{ serverErrorMsg }}</p>
+    </div>
+  </div>
+
+  <!-- Cross-Field Benchmark Error Banner -->
+  <div class="server-error-banner" *ngIf="crossFieldErrors?.['salaryBelowBenchmark']">
+    <div class="banner-icon">⚠️</div>
+    <div>
+      <strong>Cross-Field Policy Violation: Department Salary Benchmark</strong>
+      <p>
+        The minimum salary for the <strong>{{ crossFieldErrors?.['salaryBelowBenchmark'].department }}</strong> department is
+        <strong>${{ crossFieldErrors?.['salaryBelowBenchmark'].minExpected | number:'1.0-0' }}</strong>. Current:
+        ${{ crossFieldErrors?.['salaryBelowBenchmark'].actual | number:'1.0-0' }}.
+      </p>
+    </div>
+  </div>
+
+  <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="form-body">
+    <!-- Section 1: Basic Identity -->
+    <div class="portal-card">
+      <h2 class="section-title">1. Personal &amp; Corporate Identity</h2>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="emp-name">
+            Full Name <span class="req">*</span>
+          </label>
+          <input
+            id="emp-name"
+            type="text"
+            formControlName="name"
+            class="form-control"
+            [class.is-invalid]="f['name'].touched && f['name'].invalid"
+            placeholder="e.g. Sujal Nage"
+          />
+          <div class="invalid-feedback" *ngIf="f['name'].touched && f['name'].errors?.['required']">
+            Name is required.
+          </div>
+          <div class="invalid-feedback" *ngIf="f['name'].touched && f['name'].errors?.['invalidNameFormat']">
+            {{ f['name'].errors?.['invalidNameFormat'] }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="emp-email">
+            Corporate Email Address <span class="req">*</span>
+          </label>
+          <input
+            id="emp-email"
+            type="email"
+            formControlName="email"
+            class="form-control"
+            [class.is-invalid]="f['email'].touched && f['email'].invalid"
+            placeholder="name@spikeoffice.io"
+          />
+          <div class="invalid-feedback" *ngIf="f['email'].touched && f['email'].errors?.['required']">
+            Email is required.
+          </div>
+          <div class="invalid-feedback" *ngIf="f['email'].touched && f['email'].errors?.['invalidCorporateDomain']">
+            Corporate email must end with <strong>&#64;spikeoffice.io</strong>.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="emp-phone">Phone Number</label>
+          <input
+            id="emp-phone"
+            type="text"
+            formControlName="phone"
+            class="form-control"
+            placeholder="+1 (555) 000-0000"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="emp-date">Official Join Date <span class="req">*</span></label>
+          <input
+            id="emp-date"
+            type="date"
+            formControlName="joinDate"
+            class="form-control"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Department & Salary -->
+    <div class="portal-card">
+      <h2 class="section-title">2. Department, Role &amp; Compensation</h2>
+
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label class="form-label" for="emp-dept">Department <span class="req">*</span></label>
+          <select id="emp-dept" formControlName="department" class="form-control">
+            <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="emp-role">Job Title <span class="req">*</span></label>
+          <input
+            id="emp-role"
+            type="text"
+            formControlName="role"
+            class="form-control"
+            [class.is-invalid]="f['role'].touched && f['role'].invalid"
+          />
+          <div class="invalid-feedback" *ngIf="f['role'].touched && f['role'].errors?.['required']">
+            Role is required.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="emp-salary">Annual Salary ($) <span class="req">*</span></label>
+          <input
+            id="emp-salary"
+            type="number"
+            step="1000"
+            formControlName="salary"
+            class="form-control"
+            [class.is-invalid]="f['salary'].touched && f['salary'].invalid"
+          />
+        </div>
+      </div>
+
+      <div class="status-toggle-wrap">
+        <label class="checkbox-lbl">
+          <input type="checkbox" formControlName="active" />
+          <span>Active Employee Account Status</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Section 3: Managerial Conditional Fields -->
+    <div class="portal-card manager-box">
+      <div class="manager-head">
+        <div>
+          <h2 class="section-title" style="margin-bottom: 0;">3. Management Oversight (Conditional)</h2>
+          <p class="form-hint">Enables team reporting structure and bonus management</p>
+        </div>
+        <label class="switch-badge">
+          <input type="checkbox" formControlName="isManager" />
+          <span>Is People Manager?</span>
+        </label>
+      </div>
+
+      <div class="form-grid-2" *ngIf="f['isManager'].value" style="margin-top: 1.25rem;">
+        <div class="form-group">
+          <label class="form-label">Supervised Team Size <span class="req">*</span></label>
+          <input
+            type="number"
+            min="1"
+            formControlName="teamSize"
+            class="form-control"
+            [class.is-invalid]="f['teamSize'].touched && f['teamSize'].invalid"
+          />
+          <div class="invalid-feedback" *ngIf="f['teamSize'].touched && f['teamSize'].errors?.['required']">
+            Team size required for managers.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Leadership Bonus ($)</label>
+          <input
+            type="number"
+            step="500"
+            formControlName="managerBonus"
+            class="form-control"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Dynamic Skills using FormArray -->
+    <div class="portal-card">
+      <div class="skills-head">
+        <div>
+          <h2 class="section-title" style="margin-bottom: 0;">4. Verified Skills (FormArray)</h2>
+          <p class="form-hint">At least one skill is required</p>
+        </div>
+        <div class="add-skill-row">
+          <input
+            #skillInput
+            type="text"
+            class="form-control"
+            style="min-width: 220px;"
+            placeholder="Type skill and press Add..."
+            (keydown.enter)="$event.preventDefault(); addSkill(skillInput.value); skillInput.value = ''"
+          />
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            (click)="addSkill(skillInput.value); skillInput.value = ''"
+          >
+            + Add Skill
+          </button>
+        </div>
+      </div>
+
+      <div class="skills-chips">
+        <div class="skill-item" *ngFor="let s of skillsArray.controls; let i = index">
+          <span>{{ s.value }}</span>
+          <button type="button" class="del-skill-btn" (click)="removeSkill(i)">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: Notes -->
+    <div class="portal-card">
+      <h2 class="section-title">5. Internal HR Notes</h2>
+      <div class="form-group">
+        <textarea
+          rows="3"
+          formControlName="notes"
+          class="form-control"
+          placeholder="Enter career background or internal notes..."
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Submit Footer -->
+    <div class="form-footer">
+      <div class="dirty-status">
+        <span *ngIf="employeeForm.dirty" class="text-amber">● Unsaved edits present (CanDeactivate guard active)</span>
+        <span *ngIf="!employeeForm.dirty" class="text-green">✓ Synced</span>
+      </div>
+
+      <div class="footer-btns">
+        <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="employeeForm.invalid || isSubmitting"
+        >
+          {{ isEditMode ? 'Confirm Changes' : 'Submit New Staff' }}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

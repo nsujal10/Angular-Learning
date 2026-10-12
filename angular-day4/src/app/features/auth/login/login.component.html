@@ -1,0 +1,89 @@
+<div class="login-wrapper">
+  <div class="login-card portal-card">
+    <div class="brand-header">
+      <div class="brand-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+      </div>
+      <h2>SpikeHR Portal <span class="v4-badge">v4 API</span></h2>
+      <p class="brand-sub">Enterprise Workforce Management • REST Backend</p>
+    </div>
+
+    <!-- Quick Demo Accounts -->
+    <div class="demo-box">
+      <span class="demo-title">Quick Demo Sign-In (Click to Test):</span>
+      <div class="demo-btns">
+        <button type="button" class="demo-btn admin" (click)="quickFill('admin@spikeoffice.io', 'Admin@123')">
+          👑 Admin
+        </button>
+        <button type="button" class="demo-btn manager" (click)="quickFill('manager@spikeoffice.io', 'Manager@123')">
+          💼 Manager
+        </button>
+        <button type="button" class="demo-btn employee" (click)="quickFill('employee@spikeoffice.io', 'Employee@123')">
+          👤 Employee
+        </button>
+      </div>
+
+      <div class="fail-test-row">
+        <button type="button" class="test-fail-btn" (click)="testWrongCredentials()">
+          ⚠️ Test Failure: Wrong Password
+        </button>
+      </div>
+    </div>
+
+    <!-- Server Error Alert Banner -->
+    <div class="error-banner" *ngIf="serverErrorMsg">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>{{ serverErrorMsg }}</span>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label class="form-label" for="login-email">
+          Corporate Email Address <span class="req">*</span>
+        </label>
+        <input
+          id="login-email"
+          type="email"
+          formControlName="email"
+          class="form-control"
+          [class.is-invalid]="f['email'].touched && f['email'].invalid"
+          placeholder="admin@spikeoffice.io"
+        />
+        <div class="invalid-feedback" *ngIf="f['email'].touched && f['email'].errors?.['required']">
+          Email is required.
+        </div>
+        <div class="invalid-feedback" *ngIf="f['email'].touched && f['email'].errors?.['email']">
+          Enter a valid email address.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="login-password">
+          Account Password <span class="req">*</span>
+        </label>
+        <input
+          id="login-password"
+          type="password"
+          formControlName="password"
+          class="form-control"
+          [class.is-invalid]="f['password'].touched && f['password'].invalid"
+          placeholder="••••••••"
+        />
+        <div class="invalid-feedback" *ngIf="f['password'].touched && f['password'].errors?.['required']">
+          Password is required.
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary submit-btn"
+        [disabled]="loginForm.invalid || isLoading"
+      >
+        <span *ngIf="!isLoading">Authenticate to Portal</span>
+        <span *ngIf="isLoading" class="btn-loading">
+          <span class="spinner"></span> Contacting API...
+        </span>
+      </button>
+    </form>
+  </div>
+</div>
