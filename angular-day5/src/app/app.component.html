@@ -1,0 +1,28 @@
+<div class="app-layout">
+  <!-- Top Navigation Header -->
+  <header class="app-navbar">
+    <div class="nav-left">
+      <a routerLink="/" class="brand-link">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div class="brand-titles">
+          <span class="brand-name">SpikeHR <span class="v5-tag">v5 RxJS</span></span>
+          <span class="brand-sub">Reactive Search Pattern Lab</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="nav-right">
+      <div class="api-tag">
+        <span class="pulse-dot"></span>
+        <span>Proxy /api &rarr; http://localhost:3000</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View -->
+  <main class="app-main">
+    <router-outlet></router-outlet>
+  </main>
+</div>
