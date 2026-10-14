@@ -1,0 +1,171 @@
+<div class="ngrx-container">
+  <!-- Top Bar & Control Panel -->
+  <div class="control-panel">
+    <div class="panel-header">
+      <div class="title-wrap">
+        <span class="ngrx-badge">NgRx Store & Effects</span>
+        <h3 class="panel-title">Redux State Cycle Demonstration</h3>
+      </div>
+      <div class="telemetry">
+        <span class="tel-label">Last Dispatched:</span>
+        <code class="tel-code">{{ (lastAction$ | async) || 'None' }}</code>
+      </div>
+    </div>
+
+    <!-- Dispatch Action Buttons -->
+    <div class="actions-toolbar">
+      <button class="btn btn-primary" (click)="dispatchLoad()" [disabled]="loading$ | async">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+        Dispatch loadEmployees
+      </button>
+
+      <button class="btn btn-warning" (click)="dispatchTriggerError()" [disabled]="loading$ | async">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        Trigger API Error (Effect Failure)
+      </button>
+
+      <button class="btn btn-secondary" (click)="dispatchCreateSample()" [disabled]="loading$ | async">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Dispatch createEmployee
+      </button>
+
+      <button class="btn btn-ghost" (click)="dispatchReset()">
+        Reset Store
+      </button>
+    </div>
+
+    <!-- Filter input within NgRx -->
+    <div class="filter-box">
+      <input
+        type="text"
+        [ngModel]="filterQuery$ | async"
+        (ngModelChange)="onFilterChange($event)"
+        placeholder="Filter through NgRx selector..."
+        class="ngrx-search-input"
+      />
+    </div>
+  </div>
+
+  <!-- Loading State Display -->
+  @if (loading$ | async) {
+    <div class="state-banner loading-banner">
+      <div class="spinner"></div>
+      <div class="banner-text">
+        <strong>NgRx Effect in-flight...</strong>
+        <span>switchMap() currently resolving asynchronous API request. Reducer will receive success/failure action upon completion.</span>
+      </div>
+    </div>
+  }
+
+  <!-- Error State Display -->
+  @if (error$ | async; as errorMsg) {
+    <div class="state-banner error-banner">
+      <div class="error-icon">❌</div>
+      <div class="banner-text">
+        <strong>NgRx Failure Action Dispatched:</strong>
+        <p>{{ errorMsg }}</p>
+        <div class="error-actions">
+          <button class="btn-retry" (click)="dispatchLoad()">Retry with API Restored</button>
+          <button class="btn-clear" (click)="dispatchClearError()">Dismiss Error</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Results State Display from Selectors -->
+  <div class="ngrx-grid">
+    <div class="ngrx-list-pane">
+      <div class="pane-header">
+        <span class="pane-title">Store Entities (Selector: <code>selectFilteredEmployees</code>)</span>
+        <span class="count-pill">{{ employeeCount$ | async }} Employees</span>
+      </div>
+
+      <div class="ngrx-items-list">
+        @for (emp of filteredEmployees$ | async; track emp.id) {
+          <div
+            class="ngrx-item-row"
+            (click)="dispatchSelect(emp.id)"
+          >
+            <img [src]="emp.avatar" [alt]="emp.name" class="item-avatar" />
+            <div class="item-info">
+              <div class="item-top">
+                <span class="item-name">{{ emp.name }}</span>
+                <span class="dept-chip">{{ emp.department }}</span>
+              </div>
+              <span class="item-role">{{ emp.role }} • ${{ emp.salary | number }}</span>
+            </div>
+            <button
+              class="item-delete-btn"
+              (click)="dispatchDelete(emp.id, $event)"
+              title="Dispatch deleteEmployee"
+            >
+              ✕
+            </button>
+          </div>
+        } @empty {
+          <div class="empty-ngrx">
+            No employees in Store state. Click "Dispatch loadEmployees" above.
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Right Pane: Selected Entity Detail from Selector -->
+    <div class="ngrx-detail-pane">
+      <div class="pane-header">
+        <span class="pane-title">Selector: <code>selectSelectedEmployee</code></span>
+      </div>
+
+      @if (selectedEmployee$ | async; as selected) {
+        <div class="selected-box">
+          <div class="selected-top">
+            <img [src]="selected.avatar" [alt]="selected.name" class="sel-avatar" />
+            <div>
+              <h4 class="sel-name">{{ selected.name }}</h4>
+              <p class="sel-role">{{ selected.role }}</p>
+              <span class="sel-dept">{{ selected.department }}</span>
+            </div>
+          </div>
+
+          <div class="sel-metrics">
+            <div class="sel-metric">
+              <span class="m-lbl">Annual Compensation</span>
+              <span class="m-val">${{ selected.salary | number }}</span>
+            </div>
+            <div class="sel-metric">
+              <span class="m-lbl">Performance</span>
+              <span class="m-val">{{ selected.performanceScore }}%</span>
+            </div>
+            <div class="sel-metric">
+              <span class="m-lbl">Status</span>
+              <span class="m-val">{{ selected.status }}</span>
+            </div>
+          </div>
+
+          <div class="sel-skills">
+            <span class="skills-label">Skills in NgRx Entity:</span>
+            <div class="chips">
+              @for (skill of selected.skills; track skill) {
+                <span class="chip">{{ skill }}</span>
+              }
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="empty-ngrx">
+          Click an employee row to test <code>selectEmployee({{ '{' }} id {{ '}' }})</code> action dispatch.
+        </div>
+      }
+    </div>
+  </div>
+</div>

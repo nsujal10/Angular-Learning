@@ -1,0 +1,143 @@
+<div class="modal-backdrop" (click)="onCancel()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="header-titles">
+        <h3 class="modal-title">{{ employeeToEdit ? 'Edit Employee Profile' : 'Add New Team Member' }}</h3>
+        <p class="modal-subtitle">
+          {{ employeeToEdit ? 'Modify employee information and state immutably' : 'Create an employee record registered into state signals' }}
+        </p>
+      </div>
+      <button class="close-x" (click)="onCancel()" title="Close dialog">✕</button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="modal-form">
+      <!-- Full Name & Email -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input
+            type="text"
+            formControlName="name"
+            class="form-control"
+            placeholder="e.g. Alex Morgan"
+            [class.invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+          />
+          @if (form.get('name')?.invalid && form.get('name')?.touched) {
+            <span class="field-error">Name must be at least 2 characters</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Work Email *</label>
+          <input
+            type="email"
+            formControlName="email"
+            class="form-control"
+            placeholder="alex.m@cyberdyne.dev"
+            [class.invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+          />
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <span class="field-error">Valid email address required</span>
+          }
+        </div>
+      </div>
+
+      <!-- Role & Department -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Job Title / Role *</label>
+          <input
+            type="text"
+            formControlName="role"
+            class="form-control"
+            placeholder="e.g. Senior Frontend Engineer"
+            [class.invalid]="form.get('role')?.invalid && form.get('role')?.touched"
+          />
+          @if (form.get('role')?.invalid && form.get('role')?.touched) {
+            <span class="field-error">Role is required</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Department *</label>
+          <select formControlName="department" class="form-control select-control">
+            @for (dept of departments; track dept) {
+              <option [value]="dept">{{ dept }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Status, Salary & Score -->
+      <div class="form-row trio">
+        <div class="form-group">
+          <label class="form-label">Status *</label>
+          <select formControlName="status" class="form-control select-control">
+            @for (status of statuses; track status) {
+              <option [value]="status">{{ status }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Annual Salary ($) *</label>
+          <input
+            type="number"
+            formControlName="salary"
+            class="form-control"
+            placeholder="95000"
+            [class.invalid]="form.get('salary')?.invalid && form.get('salary')?.touched"
+          />
+          @if (form.get('salary')?.invalid && form.get('salary')?.touched) {
+            <span class="field-error">Min $30k</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Score (0-100) *</label>
+          <input
+            type="number"
+            formControlName="performanceScore"
+            class="form-control"
+            placeholder="85"
+            [class.invalid]="form.get('performanceScore')?.invalid && form.get('performanceScore')?.touched"
+          />
+        </div>
+      </div>
+
+      <!-- Skills comma separated -->
+      <div class="form-group">
+        <label class="form-label">Skills (comma-separated) *</label>
+        <input
+          type="text"
+          formControlName="skillsInput"
+          class="form-control"
+          placeholder="Angular, RxJS, TypeScript, Signal Architecture"
+          [class.invalid]="form.get('skillsInput')?.invalid && form.get('skillsInput')?.touched"
+        />
+        @if (form.get('skillsInput')?.invalid && form.get('skillsInput')?.touched) {
+          <span class="field-error">At least one skill required</span>
+        }
+      </div>
+
+      <!-- Avatar URL -->
+      <div class="form-group">
+        <label class="form-label">Avatar Image URL *</label>
+        <input
+          type="text"
+          formControlName="avatar"
+          class="form-control"
+          placeholder="https://..."
+        />
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancel</button>
+        <button type="submit" class="btn btn-primary">
+          {{ employeeToEdit ? 'Save Changes' : 'Create Employee' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

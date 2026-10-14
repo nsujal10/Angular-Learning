@@ -1,0 +1,325 @@
+<div class="dashboard-root" [attr.data-theme]="state.theme()">
+  <!-- Top Navigation Bar -->
+  <header class="dashboard-header">
+    <div class="header-brand">
+      <div class="logo-symbol">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+          <polyline points="2 17 12 22 22 17"></polyline>
+          <polyline points="2 12 12 17 22 12"></polyline>
+        </svg>
+      </div>
+      <div class="brand-titles">
+        <h1 class="brand-name">PulseHQ • Employee Management</h1>
+        <span class="brand-sub">Angular Day 6 Master Project • Signals, RxJS & NgRx State</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Sync notification pill -->
+      <div class="sync-pill" title="Synchronized via Angular effect() to browser storage">
+        <span class="sync-dot"></span>
+        <span class="sync-text">Synced: {{ state.lastSyncTimestamp() }}</span>
+      </div>
+
+      <!-- Theme Toggle -->
+      <button class="theme-toggle-btn" (click)="toggleTheme()" [title]="'Switch to ' + (state.theme() === 'dark' ? 'Light' : 'Dark') + ' Mode'">
+        @if (state.theme() === 'dark') {
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        } @else {
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        }
+      </button>
+
+      <!-- Reset Demo State Button -->
+      <button class="reset-btn" (click)="resetAll()" title="Reset state to initial sample data">
+        Reset Demo
+      </button>
+    </div>
+  </header>
+
+  <!-- Summary Metric Cards (Powered by computed() signals) -->
+  <div class="metrics-row">
+    <div class="metric-card">
+      <div class="metric-icon blue">👥</div>
+      <div class="metric-body">
+        <span class="metric-title">Total Headcount</span>
+        <span class="metric-number">{{ state.totalCount() }}</span>
+      </div>
+      <span class="metric-tag">Signals computed()</span>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon emerald">🎯</div>
+      <div class="metric-body">
+        <span class="metric-title">Filtered Matches</span>
+        <span class="metric-number">{{ state.employeeCount() }}</span>
+      </div>
+      <span class="metric-tag">Reactive Filter</span>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon violet">🏢</div>
+      <div class="metric-body">
+        <span class="metric-title">Engineering / Design</span>
+        <span class="metric-number">
+          {{ state.departmentStats()['Engineering'] }} / {{ state.departmentStats()['Design'] }}
+        </span>
+      </div>
+      <span class="metric-tag">Dept Distribution</span>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon amber">⚡</div>
+      <div class="metric-body">
+        <span class="metric-title">Product / Ops / Mktg</span>
+        <span class="metric-number">
+          {{ state.departmentStats()['Product'] }} / {{ state.departmentStats()['Operations'] }} / {{ state.departmentStats()['Marketing'] }}
+        </span>
+      </div>
+      <span class="metric-tag">computed() Aggregation</span>
+    </div>
+  </div>
+
+  <!-- Primary Tab Navigation -->
+  <nav class="tabs-nav" aria-label="Dashboard views">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'signals'"
+      (click)="setTab('signals')"
+    >
+      <span class="tab-badge">Signals</span>
+      <span>Shared State Dashboard</span>
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'rxjs'"
+      (click)="setTab('rxjs')"
+    >
+      <span class="tab-badge">RxJS + Signals</span>
+      <span>Live Pipeline & Effect Sync</span>
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'ngrx'"
+      (click)="setTab('ngrx')"
+    >
+      <span class="tab-badge">NgRx Store</span>
+      <span>Actions, Reducer & Effects</span>
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'checklist'"
+      (click)="setTab('checklist')"
+    >
+      <span class="tab-badge check">16/16</span>
+      <span>Day 6 Checklist & Architecture</span>
+    </button>
+  </nav>
+
+  <!-- Tab Contents -->
+  <main class="tab-content-area">
+    <!-- TAB 1: SIGNALS SHARED STATE (List + Detail) -->
+    @if (activeTab === 'signals') {
+      <div class="signals-split-view">
+        <div class="split-left">
+          <app-employee-list
+            (createEmployee)="openCreateModal()"
+            (editEmployee)="openEditModal($event)"
+          ></app-employee-list>
+        </div>
+
+        <div class="split-right">
+          <app-employee-detail
+            (editEmployee)="openEditModal($event)"
+          ></app-employee-detail>
+        </div>
+      </div>
+    }
+
+    <!-- TAB 2: RXJS & EFFECTS PIPELINE -->
+    @if (activeTab === 'rxjs') {
+      <app-employee-search></app-employee-search>
+    }
+
+    <!-- TAB 3: NGRX STORE DEMONSTRATION -->
+    @if (activeTab === 'ngrx') {
+      <app-ngrx-dashboard></app-ngrx-dashboard>
+    }
+
+    <!-- TAB 4: DAY 6 CHECKLIST INSPECTOR -->
+    @if (activeTab === 'checklist') {
+      <div class="checklist-card">
+        <div class="checklist-header">
+          <div>
+            <h3 class="checklist-title">Day 6 Practical Assignment Checklist</h3>
+            <p class="checklist-subtitle">Complete 16/16 requirements verification and architecture map</p>
+          </div>
+          <div class="completion-pill">16 of 16 Completed (100%)</div>
+        </div>
+
+        <div class="checklist-grid">
+          <!-- Section 1 -->
+          <div class="check-section">
+            <h4 class="section-heading">1. Signals Fundamentals (3/3)</h4>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Create writable signals for employees, search term and selected employee ID</strong>
+                <p>Implemented in <code>EmployeeStateService</code> with <code>#employees = signal(...)</code>, <code>#searchTerm = signal(...)</code>, <code>#selectedEmployeeId = signal(...)</code>.</p>
+              </div>
+            </div>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Use set() and update() for immutable changes</strong>
+                <p>Used <code>set()</code> for search term, employee selection, and state reset; used <code>update()</code> for immutable additions, mapping updates, and filtering deletions.</p>
+              </div>
+            </div>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Use computed() for filtered employees, employee count and selected employee</strong>
+                <p>Computed signals: <code>filteredEmployees()</code>, <code>employeeCount()</code>, <code>selectedEmployee()</code>, and <code>departmentStats()</code>.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2 -->
+          <div class="check-section">
+            <h4 class="section-heading">2. Effects and RxJS (3/3)</h4>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Create an effect that logs a meaningful state change or synchronizes a browser preference</strong>
+                <p>Angular <code>effect()</code> synchronizes state to <code>localStorage['employee_dashboard_pref']</code> and streams human-readable activity log timestamps.</p>
+              </div>
+            </div>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Connect search to an API using toObservable(), debounceTime() and switchMap()</strong>
+                <p>Pipeline in <code>EmployeeStateService</code> pipes <code>toObservable(this.#searchTerm)</code> through <code>debounceTime(300)</code> and <code>switchMap(...)</code>.</p>
+              </div>
+            </div>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Use toSignal() to expose the latest results and handle loading/error states</strong>
+                <p>Exposes <code>searchApiState</code> via <code>toSignal()</code> with structured <code>data</code>, <code>loading</code>, and <code>error</code> states cleanly rendered in template.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3 -->
+          <div class="check-section">
+            <h4 class="section-heading">3. Shared Application State (3/3)</h4>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Create an EmployeeStateService with private writable signals and public read-only signals</strong>
+                <p>Private ECMAScript <code>#employees</code>, <code>#searchTerm</code> exposed as <code>employees = this.#employees.asReadonly()</code>.</p>
+              </div>
+            </div>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Share employee state between list and details components</strong>
+                <p><code>EmployeeListComponent</code> and <code>EmployeeDetailComponent</code> both inject <code>EmployeeStateService</code> and react to <code>selectedEmployee()</code> seamlessly.</p>
+              </div>
+            </div>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Add create, select, update and delete methods</strong>
+                <p>Provided methods: <code>createEmployee()</code>, <code>selectEmployee()</code>, <code>updateEmployee()</code>, and <code>deleteEmployee()</code>.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4 -->
+          <div class="check-section">
+            <h4 class="section-heading">4. NgRx Fundamentals (3/3)</h4>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Create actions, a reducer and selectors for employees</strong>
+                <p>Actions defined in <code>employee.actions.ts</code>; pure reducer in <code>employee.reducer.ts</code>; memoized selectors in <code>employee.selectors.ts</code>.</p>
+              </div>
+            </div>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Use an effect for API loading and success/failure actions</strong>
+                <p><code>EmployeeEffects</code> handles <code>loadEmployees$</code>, <code>createEmployee$</code>, and <code>deleteEmployee$</code> dispatching success and failure actions.</p>
+              </div>
+            </div>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Register the Store and Effects and display loading, error and result states</strong>
+                <p>Registered in <code>app.config.ts</code> with <code>provideStore()</code> and <code>provideEffects()</code>; visual UI in "NgRx Store" tab showcases loading skeleton, error banner, and results.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 5 -->
+          <div class="check-section wide">
+            <h4 class="section-heading">5. Testing and Debugging (4/4)</h4>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Test computed filtering and immutable updates</strong>
+                <p>Unit test in <code>employee-state.service.spec.ts</code> tests filtering by role, query, and verifies array reference immutability on <code>update()</code>.</p>
+              </div>
+            </div>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Test reducer outputs without making HTTP requests</strong>
+                <p>Pure unit tests in <code>employee.reducer.spec.ts</code> asserting synchronous state transitions for all actions.</p>
+              </div>
+            </div>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Test the effect with a mocked API service</strong>
+                <p>Unit test in <code>employee.effects.spec.ts</code> verifies <code>loadEmployees$</code> dispatching <code>loadEmployeesSuccess</code> and <code>loadEmployeesFailure</code> with mocked API service.</p>
+              </div>
+            </div>
+            <div class="check-item checked">
+              <span class="check-icon">✓</span>
+              <div>
+                <strong>Verify that the service provider scope is correct</strong>
+                <p>Unit test in <code>provider-scope.spec.ts</code> validates root singleton behavior and hierarchical child injector scoping.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </main>
+
+  <!-- Create/Edit Modal Component -->
+  @if (showFormModal) {
+    <app-employee-form
+      [employeeToEdit]="employeeToEdit"
+      (close)="closeModal()"
+    ></app-employee-form>
+  }
+</div>

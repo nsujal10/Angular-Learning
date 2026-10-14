@@ -1,0 +1,165 @@
+<div class="search-feature-container">
+  <!-- Architecture Showcase Card -->
+  <div class="pipeline-card">
+    <div class="pipeline-header">
+      <div class="pipeline-title-group">
+        <span class="badge-accent">Day 6 Architecture</span>
+        <h3 class="pipeline-title">Effects & RxJS Interop Pipeline</h3>
+      </div>
+
+      <button
+        class="failure-toggle-btn"
+        [class.active]="isSimulatedFailureActive()"
+        (click)="toggleSimulatedFailure()"
+        title="Toggle simulated API network failure to test error state"
+      >
+        <span class="dot"></span>
+        {{ isSimulatedFailureActive() ? 'API Outage Simulated (Active)' : 'Simulate API Outage' }}
+      </button>
+    </div>
+
+    <!-- Visual RxJS -> Signal Stream Pipeline Diagram -->
+    <div class="pipeline-steps">
+      <div class="step-box">
+        <span class="step-num">1</span>
+        <div class="step-info">
+          <span class="step-name">Writable Signal</span>
+          <code class="step-code">searchTerm = signal('')</code>
+        </div>
+      </div>
+      <div class="pipeline-arrow">➔</div>
+      <div class="step-box">
+        <span class="step-num">2</span>
+        <div class="step-info">
+          <span class="step-name">toObservable()</span>
+          <code class="step-code">toObservable(searchTerm)</code>
+        </div>
+      </div>
+      <div class="pipeline-arrow">➔</div>
+      <div class="step-box">
+        <span class="step-num">3</span>
+        <div class="step-info">
+          <span class="step-name">Debounce & Switch</span>
+          <code class="step-code">debounceTime(300) | switchMap</code>
+        </div>
+      </div>
+      <div class="pipeline-arrow">➔</div>
+      <div class="step-box highlight">
+        <span class="step-num">4</span>
+        <div class="step-info">
+          <span class="step-name">toSignal()</span>
+          <code class="step-code">searchApiState = toSignal(...)</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-main-grid">
+    <!-- Left Column: Search & Live Results -->
+    <div class="search-column">
+      <div class="search-input-wrap">
+        <svg class="search-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+          type="text"
+          [ngModel]="state.searchTerm()"
+          (ngModelChange)="onSearchInput($event)"
+          placeholder="Type to trigger toObservable() -> debounceTime() -> switchMap()..."
+          class="pipeline-search-input"
+        />
+        @if (state.searchApiState().loading) {
+          <div class="spinner-sm" title="RxJS switchMap executing request..."></div>
+        } @else if (state.searchTerm()) {
+          <button class="clear-icon" (click)="clearSearch()">✕</button>
+        }
+      </div>
+
+      <!-- State Status Indicator -->
+      <div class="state-status-bar">
+        <span class="status-indicator-tag" [class.loading]="state.searchApiState().loading">
+          Status: <strong>{{ state.searchApiState().loading ? 'Debouncing / Fetching API...' : (state.searchApiState().error ? 'API Error' : 'Stream Ready') }}</strong>
+        </span>
+        <span class="meta-tag">
+          Results from toSignal: <strong>{{ state.searchApiState().data.length }}</strong> items
+        </span>
+      </div>
+
+      <!-- Error Alert -->
+      @if (state.searchApiState().error; as error) {
+        <div class="api-error-banner">
+          <div class="error-icon">⚠️</div>
+          <div class="error-body">
+            <strong>Stream Error Caught in RxJS pipeline:</strong>
+            <p>{{ error }}</p>
+            <span class="error-tip">Exposed cleanly into template via toSignal() with error state handling! Click "Simulate API Outage" above to turn off.</span>
+          </div>
+        </div>
+      }
+
+      <!-- Results List -->
+      <div class="results-container">
+        @for (emp of state.searchApiState().data; track emp.id) {
+          <div class="result-row" (click)="state.selectEmployee(emp.id)">
+            <img [src]="emp.avatar" [alt]="emp.name" class="result-avatar" />
+            <div class="result-details">
+              <div class="result-top">
+                <span class="result-name">{{ emp.name }}</span>
+                <span class="result-dept">{{ emp.department }}</span>
+              </div>
+              <span class="result-role">{{ emp.role }} • {{ emp.email }}</span>
+            </div>
+            <div class="result-score">
+              {{ emp.performanceScore }}%
+            </div>
+          </div>
+        } @empty {
+          @if (!state.searchApiState().loading && !state.searchApiState().error) {
+            <div class="no-results">
+              <p>No employees matched the live API query.</p>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- Right Column: Effect() & Browser Preference Sync Monitor -->
+    <div class="effect-column">
+      <div class="effect-card">
+        <div class="effect-card-header">
+          <div>
+            <h4 class="card-title">effect() & Preference Sync Monitor</h4>
+            <p class="card-subtitle">Synchronizes state to browser localStorage and logs every change</p>
+          </div>
+          <button class="clear-logs-btn" (click)="clearLogs()">Clear</button>
+        </div>
+
+        <div class="sync-status-box">
+          <div class="sync-row">
+            <span class="sync-label">Browser localStorage key:</span>
+            <code class="sync-code">employee_dashboard_pref</code>
+          </div>
+          <div class="sync-row">
+            <span class="sync-label">Last synchronized at:</span>
+            <span class="sync-val">{{ state.lastSyncTimestamp() }}</span>
+          </div>
+          <div class="sync-row">
+            <span class="sync-label">Active App Theme:</span>
+            <span class="theme-badge" [attr.data-theme]="state.theme()">{{ state.theme() }}</span>
+          </div>
+        </div>
+
+        <h5 class="log-title">Live Effect Execution Stream</h5>
+        <div class="logs-feed">
+          @for (log of state.activityLogs(); track $index) {
+            <div class="log-entry">
+              <span class="log-bullet">●</span>
+              <span class="log-text">{{ log }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

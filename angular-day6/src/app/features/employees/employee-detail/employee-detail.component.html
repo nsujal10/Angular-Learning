@@ -1,0 +1,122 @@
+@if (state.selectedEmployee(); as emp) {
+  <div class="detail-card">
+    <!-- Header with Banner & Avatar -->
+    <div class="detail-hero">
+      <div class="hero-bg"></div>
+      <button class="close-btn" (click)="onClose()" title="Close details">✕</button>
+
+      <div class="hero-content">
+        <div class="avatar-large-wrap">
+          <img [src]="emp.avatar" [alt]="emp.name" class="avatar-large" />
+          <span
+            class="status-indicator"
+            [class.status-active]="emp.status === 'Active'"
+            [class.status-leave]="emp.status === 'On Leave'"
+            [class.status-term]="emp.status === 'Terminated'"
+          ></span>
+        </div>
+
+        <div class="hero-text">
+          <div class="name-status-row">
+            <h2 class="hero-name">{{ emp.name }}</h2>
+            <span class="status-pill" [attr.data-status]="emp.status">{{ emp.status }}</span>
+          </div>
+          <p class="hero-role">{{ emp.role }}</p>
+          <div class="hero-badges">
+            <span class="dept-badge" [attr.data-dept]="emp.department">{{ emp.department }}</span>
+            <span class="id-badge">ID: #{{ emp.id }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-box">
+        <span class="stat-label">Annual Salary</span>
+        <div class="stat-value-row">
+          <span class="stat-value">${{ emp.salary | number }}</span>
+          <button class="quick-bump-btn" (click)="quickSalaryBump()" title="Give +$5,000 raise">
+            +$5k
+          </button>
+        </div>
+      </div>
+
+      <div class="stat-box">
+        <span class="stat-label">Performance</span>
+        <div class="stat-value-row">
+          <span class="stat-value score">{{ emp.performanceScore }}%</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" [style.width.%]="emp.performanceScore"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-box">
+        <span class="stat-label">Joined</span>
+        <div class="stat-value-row">
+          <span class="stat-value date">{{ emp.joinDate }}</span>
+        </div>
+      </div>
+
+      <div class="stat-box">
+        <span class="stat-label">Quick Status</span>
+        <div class="stat-value-row">
+          <button class="status-toggle-btn" (click)="quickStatusToggle()">
+            Switch to {{ emp.status === 'Active' ? 'On Leave' : 'Active' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact & Details Section -->
+    <div class="detail-section">
+      <h4 class="section-title">Direct Contact</h4>
+      <div class="contact-card">
+        <div class="contact-row">
+          <span class="contact-icon">✉</span>
+          <span class="contact-text">{{ emp.email }}</span>
+        </div>
+        <div class="contact-row">
+          <span class="contact-icon">🏢</span>
+          <span class="contact-text">{{ emp.department }} Department • {{ emp.role }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills Section -->
+    <div class="detail-section">
+      <h4 class="section-title">Core Skills & Competencies</h4>
+      <div class="skills-wrap">
+        @for (skill of emp.skills; track skill) {
+          <span class="skill-pill">{{ skill }}</span>
+        }
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="detail-footer">
+      <button class="btn btn-outline" (click)="onEdit()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+        Edit Profile
+      </button>
+
+      <button class="btn btn-danger-outline" (click)="onDelete(emp.id)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        Delete Employee
+      </button>
+    </div>
+  </div>
+} @else {
+  <div class="empty-detail-card">
+    <div class="empty-graphic">👈</div>
+    <h3>Select an Employee</h3>
+    <p>Choose an employee from the list to view their detailed performance breakdown, compensation, and profile settings.</p>
+  </div>
+}
