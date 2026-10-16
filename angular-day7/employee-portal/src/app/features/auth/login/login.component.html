@@ -1,0 +1,91 @@
+<div class="login-wrapper">
+  <div class="login-container fade-in">
+    <!-- Brand Title -->
+    <div class="login-brand">
+      <div class="brand-badge">
+        <mat-icon>corporate_fare</mat-icon>
+      </div>
+      <h1>Pulse<span class="highlight">HR</span></h1>
+      <p class="brand-subtitle">Executive Workforce & Personnel Portal</p>
+    </div>
+
+    <!-- Login Card -->
+    <mat-card class="login-card">
+      <mat-card-header>
+        <mat-card-title>Authentication</mat-card-title>
+        <mat-card-subtitle>Enter your credentials to enter the workspace</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Credentials Hint Callout -->
+        <div class="demo-credentials-banner">
+          <mat-icon>vpn_key</mat-icon>
+          <div class="banner-text">
+            <span>Demo credentials pre-loaded:</span>
+            <strong>admin / admin123</strong>
+          </div>
+        </div>
+
+        @if (errorMessage(); as err) {
+          <div class="login-error-alert">
+            <mat-icon>error</mat-icon>
+            <span>{{ err }}</span>
+          </div>
+        }
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+          <!-- Username -->
+          <mat-form-field appearance="outline">
+            <mat-label>Username / Account ID</mat-label>
+            <input matInput formControlName="username" placeholder="admin">
+            <mat-icon matPrefix>person</mat-icon>
+            @if (loginForm.get('username')?.hasError('required')) {
+              <mat-error>Username is required</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Password -->
+          <mat-form-field appearance="outline">
+            <mat-label>Password</mat-label>
+            <input
+              matInput
+              [type]="hidePassword() ? 'password' : 'text'"
+              formControlName="password">
+            <mat-icon matPrefix>lock</mat-icon>
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="hidePassword.set(!hidePassword())"
+              [attr.aria-label]="'Hide password'"
+              [attr.aria-pressed]="hidePassword()">
+              <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (loginForm.get('password')?.hasError('required')) {
+              <mat-error>Password is required</mat-error>
+            }
+          </mat-form-field>
+
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="loginForm.invalid || isLoading()"
+            class="signin-btn">
+            @if (isLoading()) {
+              <mat-spinner diameter="20" class="spinner"></mat-spinner>
+              <span>Verifying credentials...</span>
+            } @else {
+              <mat-icon>login</mat-icon>
+              <span>Sign In to Portal</span>
+            }
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="login-footer">
+      <span>Part 7 — End-to-End Enterprise Architecture</span>
+    </div>
+  </div>
+</div>

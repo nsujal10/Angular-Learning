@@ -1,0 +1,127 @@
+<div class="employee-details-page">
+  @if (employeeData(); as emp) {
+    <!-- Navigation Back Link -->
+    <div class="breadcrumb-bar">
+      <button mat-button routerLink="/employees" class="back-link">
+        <mat-icon>arrow_back</mat-icon>
+        <span>Back to Employee Directory</span>
+      </button>
+    </div>
+
+    <!-- Main Profile Card -->
+    <mat-card class="profile-hero-card">
+      <mat-card-content>
+        <div class="hero-layout">
+          <!-- Avatar Initial Circle -->
+          <div class="hero-avatar">
+            {{ emp.avatar || (emp.firstName[0] + emp.lastName[0]) }}
+          </div>
+
+          <!-- Personnel Info -->
+          <div class="hero-info">
+            <div class="name-status-row">
+              <h1 class="hero-name">{{ emp.firstName }} {{ emp.lastName }}</h1>
+              <span class="badge" [ngClass]="'badge-' + emp.status.toLowerCase()">
+                {{ emp.status }}
+              </span>
+              <span class="dept-pill">{{ emp.department }}</span>
+            </div>
+            <p class="hero-role">{{ emp.role }}</p>
+            <p class="hero-id">Personnel Identifier: #EMP-{{ emp.id | number:'4.0-0' }}</p>
+          </div>
+
+          <!-- Hero Actions -->
+          <div class="hero-actions">
+            <button mat-flat-button color="primary" [routerLink]="['/employees', emp.id, 'edit']" class="edit-btn">
+              <mat-icon>edit</mat-icon>
+              <span>Edit Record</span>
+            </button>
+            <button mat-stroked-button color="warn" (click)="deleteEmployee()">
+              <mat-icon>delete_outline</mat-icon>
+              <span>Delete</span>
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Details Grid -->
+    <div class="details-grid">
+      <!-- Contact & Identification -->
+      <mat-card class="detail-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar color="primary">contact_mail</mat-icon>
+          <mat-card-title>Contact Channels</mat-card-title>
+          <mat-card-subtitle>Direct communication endpoints</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-list">
+            <div class="info-item">
+              <span class="info-label">CORPORATE EMAIL</span>
+              <a [href]="'mailto:' + emp.email" class="info-value email-link">
+                <mat-icon>email</mat-icon>
+                <span>{{ emp.email }}</span>
+              </a>
+            </div>
+
+            <div class="info-item">
+              <span class="info-label">PHONE NUMBER</span>
+              <a [href]="'tel:' + emp.phone" class="info-value phone-link">
+                <mat-icon>call</mat-icon>
+                <span>{{ emp.phone || 'Not recorded' }}</span>
+              </a>
+            </div>
+
+            <div class="info-item">
+              <span class="info-label">JOINING DATE</span>
+              <div class="info-value">
+                <mat-icon>calendar_today</mat-icon>
+                <span>{{ emp.joiningDate | date:'MMMM d, y' }}</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Financial & Performance -->
+      <mat-card class="detail-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar color="accent">payments</mat-icon>
+          <mat-card-title>Compensation & Performance</mat-card-title>
+          <mat-card-subtitle>Fiscal allocation and efficiency benchmark</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-list">
+            <div class="info-item">
+              <span class="info-label">ANNUAL BASE SALARY</span>
+              <span class="salary-highlight">{{ emp.salary | currency:'USD':'symbol':'1.0-0' }}</span>
+            </div>
+
+            <div class="info-item">
+              <div class="score-header">
+                <span class="info-label">PERFORMANCE EVALUATION</span>
+                <span class="score-value">{{ emp.performanceScore }} / 100</span>
+              </div>
+              <mat-progress-bar mode="determinate" [value]="emp.performanceScore" color="primary"></mat-progress-bar>
+              <span class="score-hint">Evaluated on leadership, architectural impact, and delivery.</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Biography & Notes -->
+      <mat-card class="detail-card full-width">
+        <mat-card-header>
+          <mat-icon mat-card-avatar color="primary">description</mat-icon>
+          <mat-card-title>Professional Biography & Responsibilities</mat-card-title>
+          <mat-card-subtitle>Executive summary of contributions</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="bio-text">
+            {{ emp.bio || 'No executive summary or notes recorded for this employee profile yet.' }}
+          </p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</div>

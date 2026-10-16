@@ -1,0 +1,241 @@
+<div class="dashboard-page">
+  <!-- Header Bar -->
+  <div class="page-header">
+    <div class="header-titles">
+      <h1 class="page-title">Executive Workforce Analytics</h1>
+      <p class="page-subtitle">Real-time health indicators, personnel capacity, and payroll distributions</p>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="loadStats()" class="refresh-btn">
+        <mat-icon>refresh</mat-icon>
+        <span>Refresh Data</span>
+      </button>
+      <button mat-flat-button color="primary" routerLink="/employees/new" class="action-btn">
+        <mat-icon>add</mat-icon>
+        <span>Onboard Employee</span>
+      </button>
+    </div>
+  </div>
+
+  @if (employeeApi.dashboardStats(); as stats) {
+    <!-- 4 High Impact KPI Metric Cards -->
+    <div class="kpi-grid">
+      <!-- KPI 1 -->
+      <mat-card class="kpi-card">
+        <mat-card-content>
+          <div class="kpi-inner">
+            <div class="kpi-meta">
+              <span class="kpi-label">TOTAL WORKFORCE</span>
+              <div class="kpi-value-row">
+                <span class="kpi-value">{{ stats.totalEmployees }}</span>
+                <span class="trend-badge positive">
+                  <mat-icon>arrow_upward</mat-icon> 12% MoM
+                </span>
+              </div>
+              <span class="kpi-subtext">Active corporate headcount</span>
+            </div>
+            <div class="kpi-icon-container gradient-indigo">
+              <mat-icon>groups</mat-icon>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- KPI 2 -->
+      <mat-card class="kpi-card">
+        <mat-card-content>
+          <div class="kpi-inner">
+            <div class="kpi-meta">
+              <span class="kpi-label">ACTIVE ON-DUTY</span>
+              <div class="kpi-value-row">
+                <span class="kpi-value">{{ stats.activeEmployees }}</span>
+                <span class="trend-badge neutral">
+                  {{ stats.totalEmployees ? (stats.activeEmployees / stats.totalEmployees * 100 | number:'1.0-0') : 0 }}% rate
+                </span>
+              </div>
+              <span class="kpi-subtext">{{ stats.onLeaveEmployees }} personnel currently on leave</span>
+            </div>
+            <div class="kpi-icon-container gradient-emerald">
+              <mat-icon>check_circle</mat-icon>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- KPI 3 -->
+      <mat-card class="kpi-card">
+        <mat-card-content>
+          <div class="kpi-inner">
+            <div class="kpi-meta">
+              <span class="kpi-label">PERFORMANCE SCORE</span>
+              <div class="kpi-value-row">
+                <span class="kpi-value">{{ stats.averagePerformance }}<small>/100</small></span>
+                <span class="trend-badge positive">High Index</span>
+              </div>
+              <span class="kpi-subtext">Evaluated quarterly benchmark</span>
+            </div>
+            <div class="kpi-icon-container gradient-amber">
+              <mat-icon>insights</mat-icon>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- KPI 4 -->
+      <mat-card class="kpi-card">
+        <mat-card-content>
+          <div class="kpi-inner">
+            <div class="kpi-meta">
+              <span class="kpi-label">TOTAL ANNUAL PAYROLL</span>
+              <div class="kpi-value-row">
+                <span class="kpi-value">{{ stats.totalPayroll | currency:'USD':'symbol':'1.0-0' }}</span>
+              </div>
+              <span class="kpi-subtext">Avg: {{ stats.averageSalary | currency:'USD':'symbol':'1.0-0' }} / employee</span>
+            </div>
+            <div class="kpi-icon-container gradient-violet">
+              <mat-icon>account_balance</mat-icon>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Analytics Visualizer Section -->
+    <div class="analytics-row">
+      <!-- Department Breakdown Chart/Meter -->
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar color="primary">pie_chart</mat-icon>
+          <mat-card-title>Department Distribution</mat-card-title>
+          <mat-card-subtitle>Workforce allocation across business units</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="dept-distribution-list">
+            @for (entry of getDepartmentEntries(stats.departmentDistribution); track entry.department) {
+              <div class="dept-row">
+                <div class="dept-info">
+                  <span class="dept-name">{{ entry.department }}</span>
+                  <span class="dept-count">{{ entry.count }} members ({{ getDepartmentPercentage(entry.count, stats.totalEmployees) }}%)</span>
+                </div>
+                <div class="meter-bar-track">
+                  <div class="meter-bar-fill" [style.width.%]="getDepartmentPercentage(entry.count, stats.totalEmployees)"></div>
+                </div>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Quick Operational Highlights -->
+      <mat-card class="status-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar color="accent">hub</mat-icon>
+          <mat-card-title>Workforce Health & Status</mat-card-title>
+          <mat-card-subtitle>Operational status proportions</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="status-summary-box">
+            <div class="status-indicator-item">
+              <div class="indicator-header">
+                <span class="badge badge-active">Active</span>
+                <span class="indicator-count">{{ stats.activeEmployees }} employees</span>
+              </div>
+              <mat-progress-bar mode="determinate" [value]="stats.totalEmployees ? (stats.activeEmployees / stats.totalEmployees * 100) : 0" color="primary"></mat-progress-bar>
+            </div>
+
+            <div class="status-indicator-item">
+              <div class="indicator-header">
+                <span class="badge badge-onleave">On Leave</span>
+                <span class="indicator-count">{{ stats.onLeaveEmployees }} employees</span>
+              </div>
+              <mat-progress-bar mode="determinate" [value]="stats.totalEmployees ? (stats.onLeaveEmployees / stats.totalEmployees * 100) : 0" color="warn"></mat-progress-bar>
+            </div>
+          </div>
+
+          <div class="system-architecture-callout">
+            <div class="callout-title">
+              <mat-icon>architecture</mat-icon>
+              <span>Architecture Highlights</span>
+            </div>
+            <ul class="callout-list">
+              <li><strong>Angular 17</strong> standalone components & Signal reactive model</li>
+              <li><strong>ASP.NET Core</strong> Web API backend with EF Core</li>
+              <li><strong>Guarded Routes</strong> with Token Bearer authentication</li>
+              <li><strong>Route Resolvers</strong> for instantaneous data hydration</li>
+            </ul>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Recent Strategic Hires Table -->
+    <mat-card class="table-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar color="primary">badge</mat-icon>
+        <mat-card-title>Recent Hires</mat-card-title>
+        <mat-card-subtitle>Latest personnel additions</mat-card-subtitle>
+        <div class="header-right-action">
+          <button mat-button color="primary" routerLink="/employees">
+            <span>View All Employees</span>
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <table mat-table [dataSource]="stats.recentHires" class="hires-table">
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef> Employee Name </th>
+            <td mat-cell *matCellDef="let hire">
+              <div class="employee-cell">
+                <div class="hire-avatar">{{ hire.name.substring(0, 2).toUpperCase() }}</div>
+                <div class="hire-meta">
+                  <span class="hire-name">{{ hire.name }}</span>
+                  <span class="hire-sub">{{ hire.role }}</span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Department Column -->
+          <ng-container matColumnDef="department">
+            <th mat-header-cell *matHeaderCellDef> Department </th>
+            <td mat-cell *matCellDef="let hire">
+              <span class="dept-pill">{{ hire.department }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Role Column -->
+          <ng-container matColumnDef="role">
+            <th mat-header-cell *matHeaderCellDef> Position </th>
+            <td mat-cell *matCellDef="let hire"> {{ hire.role }} </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef> Status </th>
+            <td mat-cell *matCellDef="let hire">
+              <span class="badge" [ngClass]="'badge-' + hire.status.toLowerCase()">
+                {{ hire.status }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="text-right"> Action </th>
+            <td mat-cell *matCellDef="let hire" class="text-right">
+              <button mat-stroked-button color="primary" [routerLink]="['/employees', hire.id]" class="view-btn">
+                <span>View Profile</span>
+                <mat-icon>open_in_new</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="recentHiresColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: recentHiresColumns;"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

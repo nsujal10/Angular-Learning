@@ -35,3 +35,10 @@ yarn-error.log*
 # OS files
 .DS_Store
 Thumbs.db
+
+# .NET & C# build outputs
+**/bin/
+**/obj/
+*.user
+*.suo
+

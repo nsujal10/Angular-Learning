@@ -1,0 +1,122 @@
+<div class="layout-wrapper">
+  <!-- Top Application Toolbar -->
+  <mat-toolbar class="app-toolbar">
+    <div class="toolbar-left">
+      <button mat-icon-button (click)="toggleSidebar()" aria-label="Toggle navigation drawer">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <div class="brand" routerLink="/dashboard">
+        <div class="brand-icon">
+          <mat-icon>corporate_fare</mat-icon>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">Pulse<span class="highlight">HR</span></span>
+          <span class="brand-tag">Enterprise Management</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar-center">
+      <div class="system-status-pill" matTooltip="ASP.NET Core Web API running on http://localhost:5000">
+        <span class="status-dot pulse"></span>
+        <span class="status-label">API Gateway Online</span>
+      </div>
+    </div>
+
+    <div class="toolbar-right">
+      <button mat-icon-button routerLink="/employees/new" matTooltip="Add New Employee" color="primary">
+        <mat-icon>person_add</mat-icon>
+      </button>
+
+      <!-- User Profile Dropdown -->
+      @if (authService.currentUser(); as user) {
+        <button mat-button [matMenuTriggerFor]="userMenu" class="user-chip">
+          <div class="user-avatar-circle">{{ user.username.substring(0, 2).toUpperCase() }}</div>
+          <div class="user-info">
+            <span class="user-name">{{ user.fullName }}</span>
+            <span class="user-role">{{ user.role }}</span>
+          </div>
+          <mat-icon>arrow_drop_down</mat-icon>
+        </button>
+
+        <mat-menu #userMenu="matMenu" xPosition="before" class="custom-mat-menu">
+          <div class="menu-header">
+            <strong>{{ user.fullName }}</strong>
+            <span class="menu-email">{{ user.email }}</span>
+          </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item routerLink="/dashboard">
+            <mat-icon>dashboard</mat-icon>
+            <span>Executive Dashboard</span>
+          </button>
+          <button mat-menu-item routerLink="/employees">
+            <mat-icon>badge</mat-icon>
+            <span>Employee Directory</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()" class="logout-item">
+            <mat-icon color="warn">logout</mat-icon>
+            <span class="text-danger">Sign Out</span>
+          </button>
+        </mat-menu>
+      }
+    </div>
+  </mat-toolbar>
+
+  <!-- Sidenav Container -->
+  <mat-sidenav-container class="sidenav-container">
+    <!-- Sidebar Navigation -->
+    <mat-sidenav
+      [opened]="isSidebarOpened()"
+      mode="side"
+      class="app-sidebar"
+      [class.sidebar-collapsed]="!isSidebarOpened()">
+
+      <div class="sidebar-section-title">MAIN NAVIGATION</div>
+
+      <mat-nav-list class="nav-links">
+        <a mat-list-item routerLink="/dashboard" routerLinkActive="active-nav-link" class="nav-item">
+          <mat-icon matListItemIcon>dashboard</mat-icon>
+          <span matListItemTitle>Workforce Dashboard</span>
+        </a>
+
+        <a mat-list-item routerLink="/employees" routerLinkActive="active-nav-link" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+          <mat-icon matListItemIcon>groups</mat-icon>
+          <span matListItemTitle>Employee Directory</span>
+        </a>
+
+        <a mat-list-item routerLink="/employees/new" routerLinkActive="active-nav-link" class="nav-item">
+          <mat-icon matListItemIcon>person_add_alt_1</mat-icon>
+          <span matListItemTitle>Onboard Employee</span>
+        </a>
+      </mat-nav-list>
+
+      <div class="sidebar-section-title">INTEGRATIONS</div>
+
+      <div class="integration-card">
+        <div class="integration-header">
+          <mat-icon class="integration-icon">terminal</mat-icon>
+          <span>ASP.NET Core API</span>
+        </div>
+        <div class="integration-body">
+          <p>Connected via JWT Bearer authentication to EF Core Data Provider.</p>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="footer-badge">
+          <span>Angular 17 Standalone</span>
+        </div>
+        <p class="copyright">Part 7 — End-to-End Portal</p>
+      </div>
+    </mat-sidenav>
+
+    <!-- Main Content Outlet Area -->
+    <mat-sidenav-content class="main-content-area">
+      <div class="content-container fade-in">
+        <router-outlet></router-outlet>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

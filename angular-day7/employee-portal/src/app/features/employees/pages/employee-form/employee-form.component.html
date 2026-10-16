@@ -1,0 +1,204 @@
+<div class="employee-form-page">
+  <!-- Header Bar -->
+  <div class="page-header">
+    <div class="header-titles">
+      <div class="breadcrumb-row">
+        <button mat-button routerLink="/employees" class="back-link">
+          <mat-icon>arrow_back</mat-icon>
+          <span>Employees</span>
+        </button>
+        <span class="divider">/</span>
+        <span class="current-crumb">{{ isEditMode() ? 'Edit Profile' : 'New Onboarding' }}</span>
+      </div>
+      <h1 class="page-title">{{ isEditMode() ? 'Edit Employee Record' : 'Onboard New Employee' }}</h1>
+      <p class="page-subtitle">Fill in the workforce details below. Backend validators will enforce uniqueness & integrity.</p>
+    </div>
+  </div>
+
+  <!-- Server-side Error Alert -->
+  @if (serverErrorMessage(); as errMsg) {
+    <div class="server-error-banner">
+      <mat-icon>warning</mat-icon>
+      <div class="error-details">
+        <strong>Validation or Conflict Error</strong>
+        <p>{{ errMsg }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Form Card -->
+  <mat-card class="form-card">
+    <mat-card-content>
+      <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="reactive-form">
+
+        <!-- Section 1: Personal Information -->
+        <div class="form-section-title">
+          <mat-icon>badge</mat-icon>
+          <span>Personal Information</span>
+        </div>
+
+        <div class="form-row">
+          <!-- First Name -->
+          <mat-form-field appearance="outline" class="col-half">
+            <mat-label>First Name</mat-label>
+            <input matInput formControlName="firstName" placeholder="e.g. Sujal">
+            <mat-icon matPrefix>person</mat-icon>
+            @if (employeeForm.get('firstName')?.hasError('required')) {
+              <mat-error>First name is required</mat-error>
+            }
+            @if (employeeForm.get('firstName')?.hasError('minlength')) {
+              <mat-error>Minimum 2 characters required</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Last Name -->
+          <mat-form-field appearance="outline" class="col-half">
+            <mat-label>Last Name</mat-label>
+            <input matInput formControlName="lastName" placeholder="e.g. Nage">
+            <mat-icon matPrefix>person_outline</mat-icon>
+            @if (employeeForm.get('lastName')?.hasError('required')) {
+              <mat-error>Last name is required</mat-error>
+            }
+            @if (employeeForm.get('lastName')?.hasError('minlength')) {
+              <mat-error>Minimum 2 characters required</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <!-- Email Address -->
+          <mat-form-field appearance="outline" class="col-half">
+            <mat-label>Corporate Email</mat-label>
+            <input matInput formControlName="email" type="email" placeholder="name@pulsehr.io">
+            <mat-icon matPrefix>email</mat-icon>
+            @if (employeeForm.get('email')?.hasError('required')) {
+              <mat-error>Email address is required</mat-error>
+            }
+            @if (employeeForm.get('email')?.hasError('email')) {
+              <mat-error>Please enter a valid email address</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Phone Number -->
+          <mat-form-field appearance="outline" class="col-half">
+            <mat-label>Contact Phone</mat-label>
+            <input matInput formControlName="phone" placeholder="+1 (555) 000-0000">
+            <mat-icon matPrefix>phone</mat-icon>
+            @if (employeeForm.get('phone')?.hasError('pattern')) {
+              <mat-error>Invalid phone number format</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Section 2: Organizational Placement -->
+        <div class="form-section-title">
+          <mat-icon>corporate_fare</mat-icon>
+          <span>Position & Organizational Role</span>
+        </div>
+
+        <div class="form-row">
+          <!-- Department -->
+          <mat-form-field appearance="outline" class="col-half">
+            <mat-label>Department</mat-label>
+            <mat-icon matPrefix>business</mat-icon>
+            <mat-select formControlName="department">
+              @for (dept of departments; track dept) {
+                <mat-option [value]="dept">{{ dept }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Job Role -->
+          <mat-form-field appearance="outline" class="col-half">
+            <mat-label>Job Role / Title</mat-label>
+            <input matInput formControlName="role" placeholder="e.g. Senior Software Architect">
+            <mat-icon matPrefix>work</mat-icon>
+            @if (employeeForm.get('role')?.hasError('required')) {
+              <mat-error>Job title is required</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <!-- Annual Salary -->
+          <mat-form-field appearance="outline" class="col-third">
+            <mat-label>Annual Base Salary (USD)</mat-label>
+            <input matInput formControlName="salary" type="number" step="1000">
+            <span matPrefix class="currency-prefix">$ &nbsp;</span>
+            @if (employeeForm.get('salary')?.hasError('required')) {
+              <mat-error>Salary is required</mat-error>
+            }
+            @if (employeeForm.get('salary')?.hasError('min')) {
+              <mat-error>Minimum salary is $20,000</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Joining Date -->
+          <mat-form-field appearance="outline" class="col-third">
+            <mat-label>Joining Date</mat-label>
+            <input matInput formControlName="joiningDate" type="date">
+            <mat-icon matPrefix>event</mat-icon>
+          </mat-form-field>
+
+          <!-- Employment Status -->
+          <mat-form-field appearance="outline" class="col-third">
+            <mat-label>Employment Status</mat-label>
+            <mat-icon matPrefix>toggle_on</mat-icon>
+            <mat-select formControlName="status">
+              @for (st of statuses; track st) {
+                <mat-option [value]="st">{{ st }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Section 3: Performance & Notes -->
+        <div class="form-section-title">
+          <mat-icon>analytics</mat-icon>
+          <span>Performance Benchmark & Executive Summary</span>
+        </div>
+
+        <div class="form-row">
+          <div class="slider-field col-half">
+            <div class="slider-label-row">
+              <span class="slider-label">Initial Performance Rating</span>
+              <span class="slider-value">{{ employeeForm.get('performanceScore')?.value }} / 100</span>
+            </div>
+            <mat-slider min="1" max="100" step="1" discrete class="custom-slider">
+              <input matSliderThumb formControlName="performanceScore">
+            </mat-slider>
+          </div>
+
+          <!-- Professional Bio -->
+          <mat-form-field appearance="outline" class="col-half">
+            <mat-label>Executive Biography / Responsibilities</mat-label>
+            <textarea matInput formControlName="bio" rows="3" placeholder="Key responsibilities, domain skills, credentials..."></textarea>
+            <mat-icon matPrefix>notes</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Submit & Actions Bar -->
+        <div class="form-actions-bar">
+          <button mat-stroked-button type="button" routerLink="/employees" class="cancel-btn">
+            Cancel
+          </button>
+
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="employeeForm.invalid || isSubmitting()"
+            class="submit-btn">
+            @if (isSubmitting()) {
+              <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
+              <span>Saving Changes...</span>
+            } @else {
+              <mat-icon>{{ isEditMode() ? 'check_circle' : 'add_task' }}</mat-icon>
+              <span>{{ isEditMode() ? 'Update Employee Record' : 'Complete Onboarding' }}</span>
+            }
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
