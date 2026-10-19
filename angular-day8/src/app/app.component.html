@@ -1,0 +1,52 @@
+<div class="app-layout">
+  <!-- Top Navigation Header -->
+  <header class="app-navbar">
+    <div class="nav-container">
+      <div class="brand-group">
+        <div class="brand-logo">⚡</div>
+        <div class="brand-info">
+          <span class="brand-title">Enterprise Pulse</span>
+          <span class="brand-badge">Day 8 Optimized Dashboard</span>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <a
+          routerLink="/employees"
+          routerLinkActive="active"
+          id="nav-employees-link"
+          class="nav-item"
+        >
+          <span class="nav-icon">👥</span>
+          <span>Employees</span>
+        </a>
+
+        <a
+          routerLink="/reports"
+          routerLinkActive="active"
+          id="nav-reports-link"
+          class="nav-item"
+        >
+          <span class="nav-icon">📊</span>
+          <span>Reports & Audits</span>
+        </a>
+      </nav>
+
+      <div class="navbar-meta">
+        <span class="live-pill">● Angular 17+ Signals</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View Area -->
+  <main class="main-content">
+    <div class="content-wrapper">
+      <router-outlet />
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>Hands-on Day 8 Project • Standalone Architecture • Angular Signals • OnPush • &#64;defer (on viewport) • Lazy Routing</p>
+  </footer>
+</div>

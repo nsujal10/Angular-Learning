@@ -1,0 +1,399 @@
+<div class="employee-dashboard-container">
+  <!-- Top Stat Cards Bar -->
+  <header class="dashboard-header">
+    <div class="header-text">
+      <div class="badge-pill">OnPush & Reactive Signals</div>
+      <h1>Workforce Management Directory</h1>
+      <p class="subtitle">High-performance employee roster optimized with stable track keys, computed state, and lazy deferral.</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-primary" id="add-employee-btn" (click)="openAddModal()">
+        <span class="btn-icon">＋</span> Add Employee
+      </button>
+    </div>
+  </header>
+
+  <!-- Metric Quick Cards -->
+  <section class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-meta">
+        <span class="kpi-title">Total Headcount</span>
+        <span class="kpi-value" id="kpi-total-employees">{{ employees().length }}</span>
+      </div>
+      <div class="kpi-icon icon-blue">👥</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-meta">
+        <span class="kpi-title">Active Members</span>
+        <span class="kpi-value" id="kpi-active-employees">{{ activeCount() }}</span>
+      </div>
+      <div class="kpi-icon icon-green">⚡</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-meta">
+        <span class="kpi-title">On Leave</span>
+        <span class="kpi-value" id="kpi-on-leave">{{ onLeaveCount() }}</span>
+      </div>
+      <div class="kpi-icon icon-amber">🏖️</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-meta">
+        <span class="kpi-title">Total Payroll</span>
+        <span class="kpi-value" id="kpi-total-payroll">${{ totalPayroll() | number }}</span>
+      </div>
+      <div class="kpi-icon icon-purple">💵</div>
+    </div>
+  </section>
+
+  <!-- Filter & Controls Toolbar -->
+  <section class="toolbar-card">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        id="employee-search-input"
+        class="search-input"
+        placeholder="Search by name, email, role, or city..."
+        [value]="searchQuery()"
+        (input)="updateSearch($event)"
+      />
+      @if (searchQuery()) {
+        <button class="clear-search-btn" (click)="searchQuery.set(''); currentPage.set(1)">✕</button>
+      }
+    </div>
+
+    <div class="filter-controls">
+      <!-- Department Filter -->
+      <div class="control-group">
+        <label for="dept-filter">Department:</label>
+        <select
+          id="dept-filter"
+          class="form-select"
+          [value]="selectedDepartment()"
+          (change)="setDepartment($any($event.target).value)"
+        >
+          <option value="All">All Departments</option>
+          @for (dept of departments; track dept) {
+            <option [value]="dept">{{ dept }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="control-group">
+        <label for="status-filter">Status:</label>
+        <select
+          id="status-filter"
+          class="form-select"
+          [value]="selectedStatus()"
+          (change)="setStatus($any($event.target).value)"
+        >
+          <option value="All">All Statuses</option>
+          @for (st of statuses; track st) {
+            <option [value]="st">{{ st }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Employees Table View -->
+  <section class="table-card">
+    <div class="table-card-header">
+      <div class="results-info">
+        <h3>Employee Roster</h3>
+        <span class="results-badge" id="filtered-count-badge">
+          Showing {{ totalCount() }} of {{ employees().length }} employees
+        </span>
+      </div>
+
+      <div class="table-options">
+        <label for="page-size-select">Per page:</label>
+        <select
+          id="page-size-select"
+          class="form-select-sm"
+          [value]="pageSize()"
+          (change)="onPageSizeChange($event)"
+        >
+          @for (sz of availablePageSizes; track sz) {
+            <option [value]="sz">{{ sz }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table" id="employees-table">
+        <thead>
+          <tr>
+            <th (click)="setSort('name')" class="clickable-th">
+              Employee Name
+              <span class="sort-indicator">{{ sortField() === 'name' ? (sortDirection() === 'asc' ? '▲' : '▼') : '↕' }}</span>
+            </th>
+            <th (click)="setSort('department')" class="clickable-th">
+              Department
+              <span class="sort-indicator">{{ sortField() === 'department' ? (sortDirection() === 'asc' ? '▲' : '▼') : '↕' }}</span>
+            </th>
+            <th>Location</th>
+            <th (click)="setSort('salary')" class="clickable-th">
+              Salary
+              <span class="sort-indicator">{{ sortField() === 'salary' ? (sortDirection() === 'asc' ? '▲' : '▼') : '↕' }}</span>
+            </th>
+            <th>Status</th>
+            <th (click)="setSort('performanceScore')" class="clickable-th">
+              Score
+              <span class="sort-indicator">{{ sortField() === 'performanceScore' ? (sortDirection() === 'asc' ? '▲' : '▼') : '↕' }}</span>
+            </th>
+            <th class="actions-header">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (emp of pagedEmployees(); track emp.id) {
+            <tr class="employee-row" [attr.data-employee-id]="emp.id">
+              <td class="emp-profile-cell">
+                <div class="emp-avatar">
+                  {{ emp.name.charAt(0) }}
+                </div>
+                <div class="emp-details">
+                  <span class="emp-name" id="employee-name-{{ emp.id }}">{{ emp.name }}</span>
+                  <span class="emp-role">{{ emp.role }}</span>
+                  <span class="emp-email">{{ emp.email }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="dept-badge">{{ emp.department }}</span>
+              </td>
+              <td class="location-cell">{{ emp.location }}</td>
+              <td class="salary-cell" id="employee-salary-{{ emp.id }}">${{ emp.salary | number }}</td>
+              <td>
+                <span
+                  class="status-pill"
+                  [attr.data-status]="emp.status"
+                  [class.status-active]="emp.status === 'Active'"
+                  [class.status-inactive]="emp.status === 'Inactive'"
+                  [class.status-on-leave]="emp.status === 'On Leave'"
+                >
+                  ● {{ emp.status }}
+                </span>
+              </td>
+              <td>
+                <span class="score-badge">⭐ {{ emp.performanceScore }}</span>
+              </td>
+              <td class="action-buttons-cell">
+                <button
+                  type="button"
+                  class="btn-action toggle-btn"
+                  [attr.aria-label]="'Toggle ' + emp.name + ' status'"
+                  (click)="toggleStatus(emp.id)"
+                  title="Toggle Active / Inactive"
+                >
+                  {{ emp.status === 'Active' ? 'Deactivate' : 'Activate' }}
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-action raise-btn"
+                  (click)="adjustSalary(emp.id, 5000)"
+                  title="Raise salary by $5,000"
+                >
+                  +$5k
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-action delete-btn"
+                  [attr.aria-label]="'Delete ' + emp.name"
+                  (click)="deleteEmployee(emp.id)"
+                  title="Remove employee"
+                >
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="empty-state-cell">
+                <div class="empty-state">
+                  <span class="empty-icon">🔎</span>
+                  <h4>No employees found</h4>
+                  <p>Try refining your search keyword or clearing filters.</p>
+                  <button class="btn btn-secondary btn-sm" (click)="searchQuery.set(''); selectedDepartment.set('All'); selectedStatus.set('All')">
+                    Reset All Filters
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    <div class="pagination-footer">
+      <div class="pagination-info">
+        @if (totalCount() > 0) {
+          Showing {{ startIndex() }} to {{ endIndex() }} of {{ totalCount() }} entries
+        } @else {
+          0 entries found
+        }
+      </div>
+
+      <div class="pagination-nav">
+        <button
+          type="button"
+          class="page-btn nav-btn"
+          id="prev-page-btn"
+          [disabled]="currentPage() <= 1"
+          (click)="setPage(currentPage() - 1)"
+        >
+          Previous
+        </button>
+
+        <span class="page-indicator">
+          Page <strong>{{ currentPage() }}</strong> of <strong>{{ totalPages() }}</strong>
+        </span>
+
+        <button
+          type="button"
+          class="page-btn nav-btn"
+          id="next-page-btn"
+          [disabled]="currentPage() >= totalPages()"
+          (click)="setPage(currentPage() + 1)"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deferred Analytics Section using Angular @defer (on viewport) -->
+  <section class="deferred-wrapper">
+    <div class="defer-explanation-card">
+      <div class="defer-badge">Angular 17+ Feature</div>
+      <h3>Deferred Workforce Analytics</h3>
+      <p>
+        The analytics component below is loaded asynchronously using
+        <code>&#64;defer (on viewport)</code> with tailored <code>&#64;placeholder</code>,
+        <code>&#64;loading</code>, and <code>&#64;error</code> blocks for peak initial page speed.
+      </p>
+    </div>
+
+    @defer (on viewport) {
+      <app-analytics-panel [employees]="employees()" />
+    } @placeholder {
+      <div class="analytics-placeholder" id="analytics-placeholder">
+        <span class="placeholder-icon">📊</span>
+        <h4>Department Workforce Intelligence</h4>
+        <p>Scroll this section into your viewport to trigger lazy loading of the analytics bundle.</p>
+        <div class="fake-pulse-bar"></div>
+      </div>
+    } @loading (minimum 300ms) {
+      <div class="analytics-loading" id="analytics-loading">
+        <div class="spinner"></div>
+        <p>Crunching analytics metrics and department distribution...</p>
+      </div>
+    } @error {
+      <div class="analytics-error" id="analytics-error">
+        <p>Failed to load analytics dashboard panel.</p>
+      </div>
+    }
+  </section>
+
+  <!-- Modal for Adding Employee -->
+  @if (isModalOpen()) {
+    <div class="modal-backdrop" (click)="closeAddModal()">
+      <div class="modal-container" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Add New Team Member</h3>
+          <button class="close-btn" (click)="closeAddModal()">✕</button>
+        </div>
+
+        <form (ngSubmit)="saveNewEmployee()" class="modal-form">
+          <div class="form-row">
+            <div class="form-field">
+              <label>Full Name *</label>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="e.g. Maya Patel"
+                required
+                [value]="newEmployeeForm().name"
+                (input)="updateNewEmployeeField('name', $any($event.target).value)"
+              />
+            </div>
+            <div class="form-field">
+              <label>Work Email *</label>
+              <input
+                type="email"
+                class="form-control"
+                placeholder="maya.patel@enterprise.io"
+                required
+                [value]="newEmployeeForm().email"
+                (input)="updateNewEmployeeField('email', $any($event.target).value)"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label>Role / Title *</label>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Lead Data Scientist"
+                required
+                [value]="newEmployeeForm().role"
+                (input)="updateNewEmployeeField('role', $any($event.target).value)"
+              />
+            </div>
+            <div class="form-field">
+              <label>Department</label>
+              <select
+                class="form-control"
+                [value]="newEmployeeForm().department"
+                (change)="updateNewEmployeeField('department', $any($event.target).value)"
+              >
+                @for (d of departments; track d) {
+                  <option [value]="d">{{ d }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label>Base Salary ($)</label>
+              <input
+                type="number"
+                class="form-control"
+                min="30000"
+                step="1000"
+                [value]="newEmployeeForm().salary"
+                (input)="updateNewEmployeeField('salary', +$any($event.target).value)"
+              />
+            </div>
+            <div class="form-field">
+              <label>Location / City</label>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="e.g. New York, NY"
+                [value]="newEmployeeForm().location"
+                (input)="updateNewEmployeeField('location', $any($event.target).value)"
+              />
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeAddModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="modal-submit-btn">Save Member</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

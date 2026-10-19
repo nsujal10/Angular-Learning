@@ -16,7 +16,10 @@ bazel-out/
 .angular/
 **/.angular/
 .sass-cache/
+# Testing
 coverage/
+test-results/
+**/test-results/
 
 # Logs
 npm-debug.log*

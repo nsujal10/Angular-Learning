@@ -1,0 +1,95 @@
+<div class="reports-container">
+  <header class="reports-header">
+    <div class="header-info">
+      <span class="feature-tag">Lazy Feature Route</span>
+      <h1>Executive Compensation & Workforce Reports</h1>
+      <p class="subtitle">Comprehensive departmental audits, compensation distributions, and resource allocations.</p>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="export-csv-btn" (click)="exportReportCsv()">
+        <span class="btn-icon">📥</span> Export CSV Report
+      </button>
+    </div>
+  </header>
+
+  @if (exportMessage()) {
+    <div class="toast-alert" id="export-toast">
+      {{ exportMessage() }}
+    </div>
+  }
+
+  <!-- Summary Cards -->
+  <section class="summary-cards">
+    <div class="summary-card">
+      <span class="summary-label">Company-wide Payroll</span>
+      <span class="summary-val font-mono">${{ totalBudget() | number }}</span>
+      <span class="summary-trend">100% Active budget</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-label">Average Annual Salary</span>
+      <span class="summary-val font-mono">${{ averageCompanySalary() | number }}</span>
+      <span class="summary-trend">Per employee benchmark</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-label">Workforce Engagement</span>
+      <span class="summary-val">{{ totalActiveRate() }}%</span>
+      <span class="summary-trend">Active status ratio</span>
+    </div>
+
+    <div class="summary-card">
+      <span class="summary-label">Monitored Departments</span>
+      <span class="summary-val">{{ departmentReports().length }}</span>
+      <span class="summary-trend">Operational divisions</span>
+    </div>
+  </section>
+
+  <!-- Department Audit Table -->
+  <section class="report-table-card">
+    <div class="card-header">
+      <h3>Department Financial Breakdown</h3>
+    </div>
+
+    <div class="table-responsive">
+      <table class="report-table" id="reports-table">
+        <thead>
+          <tr>
+            <th>Department</th>
+            <th>Headcount</th>
+            <th>Total Budget</th>
+            <th>Avg Salary</th>
+            <th>Min Salary</th>
+            <th>Max Salary</th>
+            <th>Active Ratio</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (rep of departmentReports(); track rep.department) {
+            <tr>
+              <td>
+                <span class="dept-indicator"></span>
+                <strong>{{ rep.department }}</strong>
+              </td>
+              <td>{{ rep.headcount }}</td>
+              <td class="font-mono">${{ rep.totalBudget | number }}</td>
+              <td class="font-mono">${{ rep.avgSalary | number }}</td>
+              <td class="font-mono text-muted">${{ rep.minSalary | number }}</td>
+              <td class="font-mono text-muted">${{ rep.maxSalary | number }}</td>
+              <td>
+                <span class="ratio-pill" [class.high-ratio]="rep.activeRatio >= 75">
+                  {{ rep.activeRatio }}%
+                </span>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="text-center py-4">No report data generated yet.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

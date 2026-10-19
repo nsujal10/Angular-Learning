@@ -1,0 +1,89 @@
+<div class="analytics-card" id="analytics-panel-content">
+  <div class="panel-header">
+    <div class="title-group">
+      <span class="badge-tag">Deferred Analytics Panel</span>
+      <h3>Department Metrics & Workforce Intelligence</h3>
+      <p class="subtitle">Real-time calculations computed reactively via Angular Signals & OnPush strategy</p>
+    </div>
+    <div class="highlight-stat">
+      <span class="highlight-label">Avg Performance</span>
+      <span class="highlight-val">⭐ {{ averageScore() }} / 5.0</span>
+    </div>
+  </div>
+
+  <div class="metric-tiles">
+    <div class="stat-card">
+      <div class="stat-icon bg-indigo">👥</div>
+      <div class="stat-details">
+        <span class="stat-title">Largest Org</span>
+        <span class="stat-number">{{ topDepartment()?.department || 'N/A' }}</span>
+        <span class="stat-caption">{{ topDepartment()?.headcount || 0 }} Members</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon bg-emerald">💰</div>
+      <div class="stat-details">
+        <span class="stat-title">Highest Compensation</span>
+        <span class="stat-number">{{ highestAvgSalaryDept()?.department || 'N/A' }}</span>
+        <span class="stat-caption">${{ highestAvgSalaryDept()?.averageSalary | number }} avg / yr</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon bg-amber">💼</div>
+      <div class="stat-details">
+        <span class="stat-title">Total Payroll Load</span>
+        <span class="stat-number">${{ totalPayroll() | number }}</span>
+        <span class="stat-caption">Annualized compensation</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="analytics-table">
+      <thead>
+        <tr>
+          <th>Department</th>
+          <th>Headcount</th>
+          <th>Average Salary</th>
+          <th>Total Budget</th>
+          <th>Active Rate</th>
+          <th>Allocation Bar</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of departmentMetrics(); track item.department) {
+          <tr>
+            <td class="dept-name">
+              <span class="dept-dot"></span>
+              <strong>{{ item.department }}</strong>
+            </td>
+            <td>
+              <span class="chip chip-neutral">{{ item.headcount }}</span>
+            </td>
+            <td class="font-mono">${{ item.averageSalary | number }}</td>
+            <td class="font-mono">${{ item.totalSalary | number }}</td>
+            <td>
+              <span class="badge" [class.badge-success]="item.activeRate >= 70" [class.badge-warning]="item.activeRate < 70">
+                {{ item.activeRate }}%
+              </span>
+            </td>
+            <td class="bar-cell">
+              <div class="progress-track">
+                <div
+                  class="progress-fill"
+                  [style.width.%]="(item.totalSalary / (totalPayroll() || 1)) * 100"
+                ></div>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="text-center py-4">No department metrics available</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
