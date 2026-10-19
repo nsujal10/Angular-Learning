@@ -1,0 +1,116 @@
+.login-wrapper {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: var(--shadow-lg);
+
+  .login-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+
+    .brand-logo {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-heading);
+    }
+
+    p {
+      margin: 0.35rem 0 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+  }
+}
+
+.alert-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.persona-box {
+  background: var(--surface-bg);
+  border: 1px dashed var(--border-color);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.5rem;
+
+  .persona-title {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .persona-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    .btn-persona {
+      padding: 0.45rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: var(--surface-card);
+      color: var(--text-heading);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+
+      &:hover {
+        border-color: var(--primary-color);
+        background: var(--primary-subtle);
+      }
+    }
+  }
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-heading);
+    }
+  }
+
+  .btn-block {
+    width: 100%;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+  }
+}

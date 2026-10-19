@@ -1,0 +1,76 @@
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="brand-logo">🛡️</div>
+      <h2>Enterprise Portal Login</h2>
+      <p>Secure Single Sign-On (SSO) & Role-Based Access Control</p>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="alert alert-error" role="alert">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <!-- Quick Role Persona Switcher for Immediate Testing -->
+    <div class="persona-box">
+      <span class="persona-title">Quick Demo Persona Switcher:</span>
+      <div class="persona-buttons">
+        <button
+          type="button"
+          class="btn-persona btn-admin"
+          id="persona-admin-btn"
+          (click)="quickSwitchRole('Admin')"
+        >
+          👑 Admin (Full Access)
+        </button>
+        <button
+          type="button"
+          class="btn-persona btn-manager"
+          id="persona-manager-btn"
+          (click)="quickSwitchRole('Manager')"
+        >
+          👔 Manager (Audits & Forms)
+        </button>
+        <button
+          type="button"
+          class="btn-persona btn-employee"
+          id="persona-employee-btn"
+          (click)="quickSwitchRole('Employee')"
+        >
+          👤 Employee (Restricted)
+        </button>
+      </div>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label for="login-email">Enterprise Email</label>
+        <input
+          type="email"
+          id="login-email"
+          formControlName="email"
+          class="form-control"
+          placeholder="user@enterprise.io"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input
+          type="password"
+          id="login-password"
+          formControlName="password"
+          class="form-control"
+          placeholder="••••••••"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" id="login-submit-btn">
+        Sign In to Portal
+      </button>
+    </form>
+  </div>
+</div>

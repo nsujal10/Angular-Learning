@@ -1,0 +1,180 @@
+<div class="security-container">
+  <header class="section-header">
+    <div class="security-badge">
+      <span class="badge-icon">🛡️</span> Enterprise Defense Layer
+    </div>
+    <h2>XSS, CSRF & Origin Security Architecture</h2>
+    <p class="subtitle">
+      Demonstration of Angular's built-in DomSanitization, Anti-CSRF token interceptors, and strict trusted API origin controls.
+    </p>
+  </header>
+
+  <!-- 1. XSS Defense & Untrusted Input Sanitization Section -->
+  <section class="card security-card">
+    <div class="card-header">
+      <div class="title-wrap">
+        <span class="pill pill-indigo">XSS Protection</span>
+        <h3>Safe Rendering of Untrusted Text</h3>
+      </div>
+      <div class="preset-buttons">
+        <button class="btn btn-sm btn-secondary" (click)="loadPreset('script')">&lt;script&gt; Vector</button>
+        <button class="btn btn-sm btn-secondary" (click)="loadPreset('event')">onerror Vector</button>
+        <button class="btn btn-sm btn-secondary" (click)="loadPreset('safe')">Clean Markup</button>
+      </div>
+    </div>
+
+    <div class="xss-editor">
+      <label for="untrusted-input" class="label-heading">Untrusted User Input / Remote Feed:</label>
+      <textarea
+        id="untrusted-input"
+        class="form-textarea"
+        rows="3"
+        [value]="rawInput()"
+        (input)="onInputChange($any($event.target).value)"
+        placeholder="Type or paste HTML / JavaScript payloads here..."
+      ></textarea>
+    </div>
+
+    <!-- Threat Analysis Panel -->
+    <div class="threat-scan-box" [class.threat-danger]="!xssAnalysis().isSafe">
+      <div class="threat-header">
+        <span class="status-indicator">
+          {{ xssAnalysis().isSafe ? '🟢 No Direct Executable Injections Found' : '🔴 Malicious XSS Patterns Intercepted' }}
+        </span>
+      </div>
+      @if (xssAnalysis().detectedThreats.length > 0) {
+        <ul class="threat-list">
+          @for (threat of xssAnalysis().detectedThreats; track threat) {
+            <li>⚠️ {{ threat }}</li>
+          }
+        </ul>
+      }
+    </div>
+
+    <!-- Comparison View: 3 Rendering Contexts -->
+    <div class="rendering-comparison-grid">
+      <!-- Context 1: Angular Default Text Interpolation -->
+      <div class="render-box">
+        <div class="box-tag">1. Default Interpolation (Safe)</div>
+        <p class="box-desc">Angular automatically encodes HTML entities (prevents DOM execution):</p>
+        <div class="output-preview font-mono" id="xss-interpolation-output">
+          {{ rawInput() }}
+        </div>
+      </div>
+
+      <!-- Context 2: DomSanitizer SafeHtmlPipe -->
+      <div class="render-box">
+        <div class="box-tag">2. Sanitized HTML via SafeHtmlPipe</div>
+        <p class="box-desc">Allows safe formatting while strictly stripping script and event hooks:</p>
+        <div
+          class="output-preview sanitized-html"
+          id="xss-sanitized-output"
+          [innerHTML]="rawInput() | safeHtml"
+        ></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. CSRF Defense Architecture Section -->
+  <section class="card security-card">
+    <div class="card-header">
+      <div class="title-wrap">
+        <span class="pill pill-emerald">CSRF Architecture</span>
+        <h3>Cross-Site Request Forgery (CSRF) Mitigation</h3>
+      </div>
+    </div>
+
+    <p class="desc">
+      The application implements Synchronized Token / Anti-CSRF protection. State-mutating requests
+      (<code>POST</code>, <code>PUT</code>, <code>DELETE</code>) must carry the matching
+      <code>{{ config.csrfHeaderName }}</code> header injected automatically by
+      <code>authInterceptor</code> on trusted origins.
+    </p>
+
+    <div class="csrf-status-grid">
+      <div class="info-tile">
+        <span class="tile-label">Active Session CSRF Token:</span>
+        <span class="tile-val font-mono" id="active-csrf-token">{{ auth.csrfToken() }}</span>
+      </div>
+      <div class="info-tile">
+        <span class="tile-label">Header Attached by Interceptor:</span>
+        <span class="tile-val font-mono">{{ config.csrfHeaderName }}</span>
+      </div>
+    </div>
+
+    <div class="csrf-actions">
+      <button
+        type="button"
+        class="btn btn-primary"
+        id="send-valid-csrf-btn"
+        (click)="simulateCsrfRequest(true)"
+      >
+        Send POST with Valid CSRF Token
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-danger"
+        id="send-forged-csrf-btn"
+        (click)="simulateCsrfRequest(false)"
+      >
+        Simulate Forged Request (Tampered Token)
+      </button>
+    </div>
+
+    @if (csrfSimResult(); as res) {
+      <div
+        class="simulation-banner"
+        [class.banner-success]="res.success"
+        [class.banner-error]="!res.success"
+      >
+        <strong>{{ res.success ? 'Request Accepted' : 'Security Violation Blocked' }}:</strong>
+        {{ res.message }}
+      </div>
+    }
+  </section>
+
+  <!-- 3. Trusted API Origins Configuration Section -->
+  <section class="card security-card">
+    <div class="card-header">
+      <div class="title-wrap">
+        <span class="pill pill-purple">Origin Guard</span>
+        <h3>Trusted API Origins Whitelist</h3>
+      </div>
+    </div>
+
+    <p class="desc">
+      Authorization Bearer tokens and CSRF headers are only dispatched to origins explicitly registered in the
+      <code>trustedApiOrigins</code> whitelist. External or third-party URLs will not receive ambient enterprise credentials.
+    </p>
+
+    <div class="origins-list">
+      <span class="origins-heading">Configured Whitelist:</span>
+      <div class="chips-wrap">
+        @for (origin of config.trustedApiOrigins; track origin) {
+          <span class="chip-origin">✓ {{ origin }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="origin-tester">
+      <label for="test-url-input" class="label-heading">Test Endpoint URL Validation:</label>
+      <div class="input-inline">
+        <input
+          type="text"
+          id="test-url-input"
+          class="form-control"
+          [value]="testUrl()"
+          (input)="testOriginCheck($any($event.target).value)"
+        />
+        <span
+          class="origin-result-badge"
+          [class.badge-trusted]="isUrlTrusted()"
+          [class.badge-blocked]="!isUrlTrusted()"
+        >
+          {{ isUrlTrusted() ? '🛡️ Trusted Origin (Credentials Injected)' : '🚫 Untrusted (Credentials Stripped)' }}
+        </span>
+      </div>
+    </div>
+  </section>
+</div>

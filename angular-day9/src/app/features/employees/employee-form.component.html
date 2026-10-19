@@ -1,0 +1,213 @@
+<div class="accessible-container">
+  <!-- Header Info -->
+  <header class="section-header">
+    <div class="a11y-badge">
+      <span class="a11y-icon">♿</span> WCAG 2.1 AA Compliant & Accessible
+    </div>
+    <h2>{{ i18n.t().formTitle }}</h2>
+    <p class="subtitle">{{ i18n.t().formSubtitle }}</p>
+  </header>
+
+  <!-- Success Announcement Banner -->
+  @if (formSuccess()) {
+    <div
+      class="alert alert-success"
+      role="status"
+      aria-live="polite"
+      id="form-success-banner"
+    >
+      <span class="alert-icon">✓</span>
+      <div>
+        <strong>Success:</strong> {{ formSuccess() }}
+      </div>
+    </div>
+  }
+
+  <!-- Main Accessible Form -->
+  <div class="form-grid-layout">
+    <div class="card form-card">
+      <form
+        [formGroup]="employeeForm"
+        (ngSubmit)="onSubmit()"
+        novalidate
+        aria-labelledby="form-heading"
+        class="a11y-form"
+      >
+        <h3 id="form-heading" class="card-title">Employee Onboarding Details</h3>
+
+        <!-- Full Name Field -->
+        <div class="form-group" [class.has-error]="isFieldInvalid('fullName')">
+          <label for="fullName" class="form-label">
+            {{ i18n.t().fullNameLabel }} <span class="required-indicator" aria-hidden="true">*</span>
+          </label>
+          <input
+            type="text"
+            id="fullName"
+            formControlName="fullName"
+            class="form-control"
+            [placeholder]="i18n.t().fullNamePlaceholder"
+            aria-required="true"
+            [attr.aria-invalid]="isFieldInvalid('fullName')"
+            [attr.aria-describedby]="isFieldInvalid('fullName') ? 'fullName-error' : 'fullName-hint'"
+          />
+          <span id="fullName-hint" class="field-hint sr-only">Enter employee full legal name</span>
+          @if (isFieldInvalid('fullName')) {
+            <div id="fullName-error" class="error-feedback" role="alert">
+              <span class="error-icon">⚠️</span> {{ i18n.t().requiredError }} (Min 3 characters)
+            </div>
+          }
+        </div>
+
+        <!-- Email Field -->
+        <div class="form-group" [class.has-error]="isFieldInvalid('email')">
+          <label for="email" class="form-label">
+            {{ i18n.t().emailLabel }} <span class="required-indicator" aria-hidden="true">*</span>
+          </label>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            class="form-control"
+            [placeholder]="i18n.t().emailPlaceholder"
+            aria-required="true"
+            [attr.aria-invalid]="isFieldInvalid('email')"
+            [attr.aria-describedby]="isFieldInvalid('email') ? 'email-error' : null"
+          />
+          @if (isFieldInvalid('email')) {
+            <div id="email-error" class="error-feedback" role="alert">
+              <span class="error-icon">⚠️</span> {{ i18n.t().invalidEmailError }}
+            </div>
+          }
+        </div>
+
+        <!-- Role & Department Row -->
+        <div class="form-row">
+          <div class="form-group" [class.has-error]="isFieldInvalid('role')">
+            <label for="role" class="form-label">
+              {{ i18n.t().roleLabel }} <span class="required-indicator" aria-hidden="true">*</span>
+            </label>
+            <input
+              type="text"
+              id="role"
+              formControlName="role"
+              class="form-control"
+              placeholder="e.g. Senior Security Specialist"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('role')"
+              [attr.aria-describedby]="isFieldInvalid('role') ? 'role-error' : null"
+            />
+            @if (isFieldInvalid('role')) {
+              <div id="role-error" class="error-feedback" role="alert">
+                <span class="error-icon">⚠️</span> {{ i18n.t().requiredError }}
+              </div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="department" class="form-label">
+              {{ i18n.t().departmentLabel }} <span class="required-indicator" aria-hidden="true">*</span>
+            </label>
+            <select
+              id="department"
+              formControlName="department"
+              class="form-select"
+              aria-required="true"
+            >
+              @for (dept of departments; track dept) {
+                <option [value]="dept">{{ dept }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Salary Field -->
+        <div class="form-group" [class.has-error]="isFieldInvalid('salary')">
+          <label for="salary" class="form-label">
+            {{ i18n.t().salaryLabel }} <span class="required-indicator" aria-hidden="true">*</span>
+          </label>
+          <div class="input-with-symbol">
+            <span class="currency-symbol" aria-hidden="true">💰</span>
+            <input
+              type="number"
+              id="salary"
+              formControlName="salary"
+              class="form-control"
+              min="30000"
+              step="1000"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('salary')"
+              [attr.aria-describedby]="isFieldInvalid('salary') ? 'salary-error' : null"
+            />
+          </div>
+          @if (isFieldInvalid('salary')) {
+            <div id="salary-error" class="error-feedback" role="alert">
+              <span class="error-icon">⚠️</span> {{ i18n.t().minSalaryError }}
+            </div>
+          }
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="reset-form-btn"
+            (click)="resetForm()"
+          >
+            {{ i18n.t().resetBtn }}
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            id="submit-employee-btn"
+          >
+            {{ i18n.t().submitBtn }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Active Records Preview (Shows i18n Date & Currency Formatting) -->
+    <div class="card records-card">
+      <div class="card-header-flex">
+        <h3>Current Roster & Formatted Data</h3>
+        <span class="locale-tag">Locale: {{ i18n.currentLocale() }}</span>
+      </div>
+      <p class="card-caption">
+        Salaries and dates below update reactively using <code>LocalizedCurrencyPipe</code> and <code>LocalizedDatePipe</code> when switching languages.
+      </p>
+
+      <div class="table-responsive">
+        <table class="a11y-table" aria-label="Employee Roster">
+          <thead>
+            <tr>
+              <th scope="col">Name / Role</th>
+              <th scope="col">Department</th>
+              <th scope="col">Salary (i18n)</th>
+              <th scope="col">Hire Date (i18n)</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (emp of employees(); track emp.id) {
+              <tr>
+                <td>
+                  <div class="emp-name">{{ emp.fullName }}</div>
+                  <div class="emp-role">{{ emp.role }}</div>
+                </td>
+                <td>
+                  <span class="dept-chip">{{ emp.department }}</span>
+                </td>
+                <td class="font-mono">
+                  {{ emp.salary | localizedCurrency }}
+                </td>
+                <td class="font-mono">
+                  {{ emp.hireDate | localizedDate }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

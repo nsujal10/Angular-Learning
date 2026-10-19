@@ -1,0 +1,158 @@
+<div class="realtime-container">
+  <header class="section-header">
+    <div class="realtime-badge">
+      <span class="badge-icon">⚡</span> SignalR & WebSocket Gateway
+    </div>
+    <h2>Real-time Notifications & Connection Resiliency</h2>
+    <p class="subtitle">
+      Persistent two-way messaging with automatic reconnection handling, exponential backoff, and screen-reader status announcements.
+    </p>
+  </header>
+
+  <!-- Connection Status Banner Card -->
+  <section class="card status-card">
+    <div class="status-summary">
+      <div class="connection-pill" [attr.data-state]="realtime.connectionState()">
+        <span class="pulse-dot"></span>
+        <span class="state-text">SignalR Status: <strong>{{ realtime.connectionState() }}</strong></span>
+      </div>
+
+      <div class="connection-meta">
+        <span>Reconnect Retries: <strong>{{ realtime.reconnectAttempts() }} / {{ realtime.maxReconnectAttempts }}</strong></span>
+        <span>Unread Alerts: <strong>{{ realtime.unreadCount() }}</strong></span>
+      </div>
+    </div>
+
+    <!-- Controls to test disconnection and auto-reconnect -->
+    <div class="connection-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        id="reconnect-hub-btn"
+        [disabled]="realtime.connectionState() === 'Connected'"
+        (click)="realtime.connect()"
+      >
+        🔌 {{ i18n.t().reconnectBtn }}
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        id="disconnect-hub-btn"
+        [disabled]="realtime.connectionState() === 'Disconnected'"
+        (click)="realtime.disconnect()"
+      >
+        🛑 {{ i18n.t().disconnectBtn }}
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-warning"
+        id="simulate-drop-btn"
+        [disabled]="realtime.connectionState() !== 'Connected'"
+        (click)="realtime.simulateDropAndReconnect()"
+      >
+        ⚠️ Simulate Network Failure & Auto-Reconnect
+      </button>
+    </div>
+  </section>
+
+  <div class="realtime-grid">
+    <!-- Trigger Simulation Panel -->
+    <section class="card trigger-card">
+      <div class="card-header">
+        <h3>Broadcast Simulated Event</h3>
+        <p class="card-desc">Push a real-time event to test the websocket pipeline and screen-reader live announcements.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="event-title">Event Title:</label>
+        <input
+          type="text"
+          id="event-title"
+          class="form-control"
+          [value]="customTitle()"
+          (input)="customTitle.set($any($event.target).value)"
+        />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="event-category">Category:</label>
+          <select
+            id="event-category"
+            class="form-select"
+            [value]="customCategory()"
+            (change)="customCategory.set($any($event.target).value)"
+          >
+            <option value="HR">HR</option>
+            <option value="Security">Security</option>
+            <option value="Payroll">Payroll</option>
+            <option value="System">System</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="event-severity">Severity:</label>
+          <select
+            id="event-severity"
+            class="form-select"
+            [value]="customSeverity()"
+            (change)="customSeverity.set($any($event.target).value)"
+          >
+            <option value="info">Info</option>
+            <option value="success">Success</option>
+            <option value="warning">Warning</option>
+            <option value="error">Error</option>
+          </select>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        id="broadcast-event-btn"
+        [disabled]="realtime.connectionState() !== 'Connected'"
+        (click)="broadcastCustomEvent()"
+      >
+        Emit Event via Hub
+      </button>
+    </section>
+
+    <!-- Notifications Feed -->
+    <section class="card feed-card">
+      <div class="card-header-actions">
+        <h3>Live Event Stream</h3>
+        <div class="feed-tools">
+          <button class="btn btn-sm btn-secondary" (click)="realtime.markAllAsRead()">Mark Read</button>
+          <button class="btn btn-sm btn-secondary" (click)="realtime.clearNotifications()">Clear</button>
+        </div>
+      </div>
+
+      <div class="notifications-list" aria-live="polite">
+        @for (item of realtime.notifications(); track item.id) {
+          <div
+            class="notification-item"
+            [class.unread]="!item.isRead"
+            [class.severity-info]="item.severity === 'info'"
+            [class.severity-success]="item.severity === 'success'"
+            [class.severity-warning]="item.severity === 'warning'"
+            [class.severity-error]="item.severity === 'error'"
+          >
+            <div class="notif-top">
+              <span class="category-chip">{{ item.category }}</span>
+              <span class="notif-time">{{ item.timestamp | localizedDate:{ hour: '2-digit', minute: '2-digit', second: '2-digit' } }}</span>
+            </div>
+            <h4 class="notif-title">{{ item.title }}</h4>
+            <p class="notif-msg">{{ item.message }}</p>
+          </div>
+        } @empty {
+          <div class="empty-feed">
+            <span class="empty-icon">📭</span>
+            <p>No notifications received yet. Connect hub or emit an event above.</p>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</div>

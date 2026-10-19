@@ -1,0 +1,166 @@
+<div class="app-layout">
+  <!-- Top Navigation Header -->
+  <header class="app-navbar" role="banner">
+    <div class="nav-container">
+      <!-- Brand Title -->
+      <a routerLink="/dashboard" class="brand-link">
+        <div class="brand-logo">🛡️</div>
+        <div class="brand-text">
+          <span class="brand-title">{{ i18n.t().portalTitle }}</span>
+          <span class="brand-sub">Enterprise Security, a11y & Real-time Platform</span>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="nav-links" role="navigation" aria-label="Main Navigation">
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="active"
+          id="nav-dashboard-link"
+          class="nav-item"
+        >
+          <span>{{ i18n.t().navDashboard }}</span>
+        </a>
+
+        <a
+          routerLink="/employees"
+          routerLinkActive="active"
+          id="nav-employees-link"
+          class="nav-item"
+        >
+          <span>{{ i18n.t().navEmployees }}</span>
+        </a>
+
+        <a
+          routerLink="/security"
+          routerLinkActive="active"
+          id="nav-security-link"
+          class="nav-item"
+        >
+          <span>{{ i18n.t().navSecurity }}</span>
+        </a>
+
+        <a
+          routerLink="/files"
+          routerLinkActive="active"
+          id="nav-files-link"
+          class="nav-item"
+        >
+          <span>{{ i18n.t().navFiles }}</span>
+        </a>
+
+        <a
+          routerLink="/realtime"
+          routerLinkActive="active"
+          id="nav-realtime-link"
+          class="nav-item"
+        >
+          <span>{{ i18n.t().navRealtime }}</span>
+          @if (realtime.unreadCount() > 0) {
+            <span class="notif-badge">{{ realtime.unreadCount() }}</span>
+          }
+        </a>
+
+        <a
+          routerLink="/error-lab"
+          routerLinkActive="active"
+          id="nav-error-lab-link"
+          class="nav-item"
+        >
+          <span>Error Lab</span>
+        </a>
+      </nav>
+
+      <!-- Right Utility Bar -->
+      <div class="nav-utilities">
+        <!-- Locale Switcher -->
+        <div class="locale-selector">
+          @for (loc of availableLocales; track loc.code) {
+            <button
+              type="button"
+              class="flag-btn"
+              [class.active]="i18n.currentLocale() === loc.code"
+              [title]="loc.name"
+              (click)="switchLocale(loc.code)"
+            >
+              {{ loc.flag }}
+            </button>
+          }
+        </div>
+
+        <!-- Role Badge -->
+        @if (auth.userRole(); as role) {
+          <span
+            class="user-role-chip"
+            [class.role-admin]="role === 'Admin'"
+            [class.role-manager]="role === 'Manager'"
+            [class.role-employee]="role === 'Employee'"
+          >
+            {{ role }}
+          </span>
+
+          <button
+            type="button"
+            class="btn-logout"
+            id="nav-logout-btn"
+            title="Sign out of enterprise portal"
+            (click)="logout()"
+          >
+            ✕
+          </button>
+        } @else {
+          <a routerLink="/login" class="btn btn-sm btn-primary">Sign In</a>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- Global Toast Alerts / Interceptor Notifications -->
+  <aside class="toast-stack" aria-live="assertive" role="region" aria-label="System Notifications">
+    @for (toast of notification.toasts(); track toast.id) {
+      <div
+        class="toast-item"
+        [class.toast-error]="toast.type === 'error'"
+        [class.toast-warning]="toast.type === 'warning'"
+        [class.toast-success]="toast.type === 'success'"
+        [class.toast-info]="toast.type === 'info'"
+      >
+        <div class="toast-content">
+          <strong class="toast-title">{{ toast.title }}</strong>
+          <p class="toast-msg">{{ toast.message }}</p>
+        </div>
+
+        <div class="toast-actions">
+          @if (toast.canRetry && toast.retryAction) {
+            <button
+              type="button"
+              class="toast-btn-retry"
+              (click)="toast.retryAction(); notification.remove(toast.id)"
+            >
+              Retry
+            </button>
+          }
+          <button
+            type="button"
+            class="toast-btn-close"
+            (click)="notification.remove(toast.id)"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+    }
+  </aside>
+
+  <!-- Main View Area -->
+  <main class="main-body" role="main">
+    <div class="main-wrapper">
+      <router-outlet />
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer" role="contentinfo">
+    <p>Enterprise Employee Portal • Day 9 Architecture: Security (CORS, JWT, RBAC), XSS/CSRF, WCAG 2.1 a11y, i18n, SignalR & HTTP Interceptors</p>
+  </footer>
+</div>

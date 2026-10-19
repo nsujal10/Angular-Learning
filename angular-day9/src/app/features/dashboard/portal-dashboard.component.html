@@ -1,0 +1,160 @@
+<div class="dashboard-container">
+  <!-- Top Welcome Banner & Persona Switcher -->
+  <header class="dashboard-banner">
+    <div class="user-profile-group">
+      <div class="user-avatar">
+        {{ auth.currentUser()?.name?.charAt(0) || 'U' }}
+      </div>
+      <div class="user-meta">
+        <div class="greeting-row">
+          <h1>{{ i18n.t().welcomeUser }}, {{ auth.currentUser()?.name }}!</h1>
+          <span
+            class="role-badge"
+            [class.role-admin]="auth.userRole() === 'Admin'"
+            [class.role-manager]="auth.userRole() === 'Manager'"
+            [class.role-employee]="auth.userRole() === 'Employee'"
+          >
+            {{ auth.userRole() }}
+          </span>
+        </div>
+        <p class="user-dept">{{ auth.currentUser()?.department }} • {{ auth.currentUser()?.email }}</p>
+      </div>
+    </div>
+
+    <!-- Quick Role Persona Switcher -->
+    <div class="persona-controls">
+      <span class="ctrl-label">Switch Active Persona:</span>
+      <div class="role-btn-group">
+        <button
+          type="button"
+          class="role-btn"
+          [class.active]="auth.userRole() === 'Admin'"
+          (click)="switchRole('Admin')"
+        >
+          Admin
+        </button>
+        <button
+          type="button"
+          class="role-btn"
+          [class.active]="auth.userRole() === 'Manager'"
+          (click)="switchRole('Manager')"
+        >
+          Manager
+        </button>
+        <button
+          type="button"
+          class="role-btn"
+          [class.active]="auth.userRole() === 'Employee'"
+          (click)="switchRole('Employee')"
+        >
+          Employee
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Internationalization & Formatting Quick Card -->
+  <section class="card i18n-banner-card">
+    <div class="i18n-header">
+      <div class="i18n-title">
+        <span class="globe-icon">🌐</span>
+        <div>
+          <h3>{{ i18n.t().activeLanguage }}: {{ i18n.currentLocaleInfo().name }} ({{ i18n.currentLocale() }})</h3>
+          <p class="subtitle">Multi-locale dictionary, currency symbol parsing, and date formatters react instantly.</p>
+        </div>
+      </div>
+
+      <!-- Locale Selector Buttons -->
+      <div class="locale-pills">
+        @for (loc of availableLocales; track loc.code) {
+          <button
+            type="button"
+            class="locale-btn"
+            [class.active]="i18n.currentLocale() === loc.code"
+            (click)="switchLocale(loc.code)"
+          >
+            <span class="flag">{{ loc.flag }}</span> {{ loc.name }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="i18n-examples-grid">
+      <div class="sample-tile">
+        <span class="sample-label">Formatted System Date:</span>
+        <span class="sample-val font-mono">{{ today | localizedDate:{ dateStyle: 'full' } }}</span>
+      </div>
+      <div class="sample-tile">
+        <span class="sample-label">Localized Benchmark Salary:</span>
+        <span class="sample-val font-mono">{{ samplePayroll | localizedCurrency }}</span>
+      </div>
+      <div class="sample-tile">
+        <span class="sample-label">Current Currency Token:</span>
+        <span class="sample-val font-mono">{{ i18n.currentLocaleInfo().currency }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Module Cards Grid (5 Topics) -->
+  <section class="modules-grid">
+    <!-- Module 1: Security & XSS/CSRF -->
+    <div class="module-card">
+      <div class="card-icon icon-indigo">🛡️</div>
+      <h4>Security, XSS & CSRF</h4>
+      <p>Origin whitelist validation, JWT session management, DomSanitizer safe HTML, and Anti-CSRF token verification.</p>
+      <div class="module-meta">
+        <span class="meta-item">CSRF: <strong>Active</strong></span>
+        <span class="meta-item">Sanitizer: <strong>Enabled</strong></span>
+      </div>
+      <a routerLink="/security" class="btn btn-secondary btn-sm">Open Security Console →</a>
+    </div>
+
+    <!-- Module 2: Accessibility (a11y) -->
+    <div class="module-card">
+      <div class="card-icon icon-emerald">♿</div>
+      <h4>Accessible Employee Form</h4>
+      <p>Keyboard-accessible form featuring explicit labels, high-visibility focus rings, ARIA descriptors, and screen reader announcements.</p>
+      <div class="module-meta">
+        <span class="meta-item">WCAG: <strong>2.1 AA</strong></span>
+        <span class="meta-item">Live Announcer: <strong>Ready</strong></span>
+      </div>
+      <a routerLink="/employees" class="btn btn-secondary btn-sm">Open Accessible Form →</a>
+    </div>
+
+    <!-- Module 3: Real-time Updates -->
+    <div class="module-card">
+      <div class="card-icon icon-amber">⚡</div>
+      <h4>Real-time SignalR Hub</h4>
+      <p>Two-way messaging gateway with automated exponential backoff reconnection, heartbeat monitors, and notification stream.</p>
+      <div class="module-meta">
+        <span class="meta-item">Hub: <strong>{{ realtime.connectionState() }}</strong></span>
+        <span class="meta-item">Unread: <strong>{{ realtime.unreadCount() }}</strong></span>
+      </div>
+      <a routerLink="/realtime" class="btn btn-secondary btn-sm">Open Live Hub →</a>
+    </div>
+
+    <!-- Module 4: Documents & Reports -->
+    <div class="module-card">
+      <div class="card-icon icon-blue">📁</div>
+      <h4>Documents & Reports</h4>
+      <p>PDF upload with upload progress calculation, %PDF- magic-byte validation, and role-authorized report downloads.</p>
+      <div class="module-meta">
+        <span class="meta-item">Max Upload: <strong>5 MB</strong></span>
+        <span class="meta-item">RBAC: <strong>Enforced</strong></span>
+      </div>
+      <a routerLink="/files" class="btn btn-secondary btn-sm">Open File Vault →</a>
+    </div>
+
+    <!-- Module 5: Error Handling Interceptor -->
+    <div class="module-card">
+      <div class="card-icon icon-rose">🧪</div>
+      <h4>Error Lab & Interceptor</h4>
+      <p>HTTP interceptor capturing 401 unauthenticated transitions, 403 forbidden access, 404 missing assets, and 500 crash retries.</p>
+      <div class="module-meta">
+        <span class="meta-item">Interceptor: <strong>Active</strong></span>
+        <span class="meta-item">Retry: <strong>Exponential</strong></span>
+      </div>
+      <a routerLink="/error-lab" class="btn btn-secondary btn-sm">Launch Error Lab →</a>
+    </div>
+  </section>
+</div>

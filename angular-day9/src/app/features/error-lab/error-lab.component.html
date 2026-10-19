@@ -1,0 +1,111 @@
+<div class="error-lab-container">
+  <header class="section-header">
+    <div class="lab-badge">
+      <span class="badge-icon">🧪</span> HTTP Interceptor & Error Handling
+    </div>
+    <h2>Fault Tolerance & Error Recovery Lab</h2>
+    <p class="subtitle">
+      Demonstration of the global <code>errorInterceptor</code> capturing network failures, 401 unauthenticated transitions, 403 forbidden states, and 500 retries.
+    </p>
+  </header>
+
+  <div class="card lab-card">
+    <div class="card-header">
+      <h3>HTTP Status Code Simulator</h3>
+      <p class="desc">
+        Click any status below to trigger the exact HTTP error lifecycle and view user-friendly recovery banners and retry states.
+      </p>
+    </div>
+
+    <div class="status-buttons-grid">
+      <button
+        type="button"
+        class="status-btn btn-401"
+        id="trigger-401-btn"
+        [disabled]="isLoading()"
+        (click)="simulateError(401)"
+      >
+        <span class="btn-code">401</span>
+        <span class="btn-name">Unauthorized (Session Expiry)</span>
+      </button>
+
+      <button
+        type="button"
+        class="status-btn btn-403"
+        id="trigger-403-btn"
+        [disabled]="isLoading()"
+        (click)="simulateError(403)"
+      >
+        <span class="btn-code">403</span>
+        <span class="btn-name">Forbidden (RBAC Block)</span>
+      </button>
+
+      <button
+        type="button"
+        class="status-btn btn-404"
+        id="trigger-404-btn"
+        [disabled]="isLoading()"
+        (click)="simulateError(404)"
+      >
+        <span class="btn-code">404</span>
+        <span class="btn-name">Not Found (Missing Resource)</span>
+      </button>
+
+      <button
+        type="button"
+        class="status-btn btn-500"
+        id="trigger-500-btn"
+        [disabled]="isLoading()"
+        (click)="simulateError(500)"
+      >
+        <span class="btn-code">500</span>
+        <span class="btn-name">Internal Server Error (Crash)</span>
+      </button>
+
+      <button
+        type="button"
+        class="status-btn btn-0"
+        id="trigger-0-btn"
+        [disabled]="isLoading()"
+        (click)="simulateError(0)"
+      >
+        <span class="btn-code">ERR 0</span>
+        <span class="btn-name">Network Offline / CORS Failure</span>
+      </button>
+    </div>
+
+    <!-- Active Loading or Error State Display -->
+    <div class="state-result-box">
+      @if (isLoading()) {
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <span>Dispatching request through HTTP interceptor pipeline...</span>
+        </div>
+      } @else if (errorMessage()) {
+        <div class="error-banner-result" role="alert">
+          <div class="banner-top">
+            <span class="error-icon">⚠️</span>
+            <div class="banner-text">
+              <strong>Intercepted Error State:</strong>
+              <p>{{ errorMessage() }}</p>
+            </div>
+          </div>
+          <div class="banner-actions">
+            <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              id="retry-request-btn"
+              (click)="retryRequest()"
+            >
+              🔄 Retry Request (Attempts: {{ retryCount() }})
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="idle-state">
+          <span>{{ currentStatus() || 'Ready. Click any error button above to inspect behavior.' }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,146 @@
+<div class="files-container">
+  <header class="section-header">
+    <div class="files-badge">
+      <span class="badge-icon">📁</span> Enterprise Asset Vault
+    </div>
+    <h2>Secure Document Upload & Authorized Report Downloads</h2>
+    <p class="subtitle">
+      Protected PDF file ingestion with live progress, binary magic-byte validation, and role-authorized report generation.
+    </p>
+  </header>
+
+  <div class="files-grid">
+    <!-- 1. PDF Upload Section -->
+    <section class="card upload-card">
+      <div class="card-header">
+        <span class="pill pill-blue">File Ingestion</span>
+        <h3>{{ i18n.t().uploadTitle }}</h3>
+        <p class="card-desc">Accepts PDF documents up to 5 MB with client-side & server-side integrity scans.</p>
+      </div>
+
+      <!-- Dropzone -->
+      <div
+        class="dropzone"
+        [class.is-dragover]="isDragging()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+      >
+        <div class="dropzone-content">
+          <span class="dropzone-icon">📄</span>
+          <h4>Drag & Drop PDF document here</h4>
+          <p>or select a file from your computer</p>
+
+          <label for="pdf-file-input" class="btn btn-primary" id="choose-pdf-btn">
+            Browse PDF File
+          </label>
+          <input
+            type="file"
+            id="pdf-file-input"
+            accept="application/pdf,.pdf"
+            class="sr-only"
+            (change)="onFileSelected($event)"
+          />
+        </div>
+      </div>
+
+      <!-- Upload Progress / Status Card -->
+      @if (uploadEvent(); as ev) {
+        <div
+          class="upload-status-card"
+          [class.status-error]="ev.status === 'error'"
+          [class.status-completed]="ev.status === 'completed'"
+        >
+          <div class="status-top">
+            <span class="file-label">
+              <strong>{{ ev.filename }}</strong>
+            </span>
+            <span class="status-pct font-mono">
+              @if (ev.status === 'validating') { Validating signature... }
+              @else if (ev.status === 'uploading') { {{ ev.progress }}% }
+              @else if (ev.status === 'completed') { Complete (100%) }
+              @else { Failed }
+            </span>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="progress-track" role="progressbar" [attr.aria-valuenow]="ev.progress" aria-valuemin="0" aria-valuemax="100">
+            <div
+              class="progress-fill"
+              [style.width.%]="ev.progress"
+              [class.fill-error]="ev.status === 'error'"
+              [class.fill-success]="ev.status === 'completed'"
+            ></div>
+          </div>
+
+          @if (ev.errorMessage) {
+            <div class="upload-error-msg" role="alert">
+              <span>⚠️</span> {{ ev.errorMessage }}
+            </div>
+          }
+
+          @if (ev.status === 'completed') {
+            <div class="upload-success-msg" role="status">
+              <span>✓</span> File integrity verified (%PDF- signature confirmed). Successfully ingested into cloud storage.
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- 2. Authorized Report Download Section -->
+    <section class="card download-card">
+      <div class="card-header">
+        <div class="title-with-badge">
+          <span class="pill pill-emerald">RBAC Downloads</span>
+          <span class="role-chip">Your Role: <strong>{{ auth.userRole() || 'Guest' }}</strong></span>
+        </div>
+        <h3>{{ i18n.t().downloadTitle }}</h3>
+        <p class="card-desc">
+          Confidential reports are protected by backend authorization. Higher classification reports will be denied to standard employees.
+        </p>
+      </div>
+
+      @if (downloadMessage()) {
+        <div class="download-alert" role="status">
+          {{ downloadMessage() }}
+        </div>
+      }
+
+      <div class="reports-list">
+        @for (rep of fileService.availableReports; track rep.id) {
+          <div class="report-item" [attr.data-report-id]="rep.id">
+            <div class="rep-meta">
+              <span class="rep-icon">📑</span>
+              <div class="rep-info">
+                <span class="rep-title">{{ rep.title }}</span>
+                <span class="rep-sub">Category: {{ rep.category }} • Size: {{ rep.size }}</span>
+              </div>
+            </div>
+
+            <div class="rep-action">
+              <span
+                class="req-badge"
+                [class.req-admin]="rep.requiredRole === 'Admin'"
+                [class.req-manager]="rep.requiredRole === 'Manager'"
+                [class.req-employee]="rep.requiredRole === 'Employee'"
+              >
+                Requires {{ rep.requiredRole }}
+              </span>
+
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                [id]="'download-btn-' + rep.id"
+                [disabled]="isDownloading() === rep.id"
+                (click)="downloadReport(rep)"
+              >
+                {{ isDownloading() === rep.id ? 'Generating...' : 'Download Report' }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</div>
